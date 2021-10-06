@@ -90,7 +90,11 @@ def search(update: Update,
             j = index_of_matched_line(lines, to_search)
             if j > -1:
                 found_match = True
-                update.message.reply_text(lines[j] if reply_with_line[update.effective_user] else ghazal_text)
+                if reply_with_line[update.effective_user]:
+                    result = lines[j - 1] + '\n' + lines[j] + '\n' + lines[j + 1]
+                    update.message.reply_text(result)
+                else:
+                    update.message.reply_text(ghazal_text)
 
     if not found_match:
         update.message.reply_text(NO_MATCH_WAS_FOUND)
