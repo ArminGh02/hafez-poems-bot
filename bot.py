@@ -74,7 +74,7 @@ def search_string(update: Update, _: CallbackContext) -> None:
     search_impl(update, string_to_search)
 
 
-def search_impl(update, to_search: Union[str, list[str]]) -> None:
+def search_impl(update: Update, to_search: Union[str, list[str]]) -> None:
     def send_results() -> None:
         to_call = index_of_matched_line_string if isinstance(to_search, str) else index_of_matched_line_words
         results = find_results(update, to_search, to_call)
@@ -178,7 +178,7 @@ def handle_inline_query(update: Update, _: CallbackContext) -> None:
                 title=search_result[:40] + '...',
                 input_message_content=InputTextMessageContent(search_result)))
 
-    update.inline_query.answer(results)
+    update.inline_query.answer(results, switch_pm_text='کمک ❓')
 
 
 def main() -> None:
