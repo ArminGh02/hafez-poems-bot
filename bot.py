@@ -178,7 +178,7 @@ def handle_inline_query(update: Update, _: CallbackContext) -> None:
                 title=search_result[:40] + '...',
                 input_message_content=InputTextMessageContent(search_result)))
 
-    update.inline_query.answer(results, switch_pm_text='کمک ❓')
+    update.inline_query.answer(results, switch_pm_text='کمک ❓', switch_pm_parameter='inline-help')
 
 
 def main() -> None:
