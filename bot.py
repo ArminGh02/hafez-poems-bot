@@ -45,14 +45,26 @@ def start(update: Update, context: CallbackContext) -> None:
             'در بیت جستجو شود، آن را درون "" بگذار.'
         )
     else:
-        update.message.reply_text(
-            f'سلام {update.effective_user.first_name}!\n'
-            'با نوشتن چند کلمه از یک بیت حافظ، غزل یا بیتی را که \n'
-            'یک بیتش شامل کلمات وارد شده، باشد دریافت خواهی کرد.\n'
-            'در ضمن اگر می خواهی کل یک عبارت با هم (و نه تک تک کلماتش)\n'
-            'در بیت جستجو شود، آن را درون "" بگذار.\n'
-            'همچنین با زدن دستور /fal یک فال می توانی بگیری.\n'
-        )
+        help_command(update, context)
+
+
+def help_command(update: Update, _: CallbackContext) -> None:
+    keyboard = [
+        [
+            InlineKeyboardButton('Github', 'https://github.com/ArminGh02/hafez-poems-telegram-bot'),
+            InlineKeyboardButton('Developer', 'https://telegram.me/ArminGh02')
+        ]
+    ]
+    reply_markup = InlineKeyboardMarkup(keyboard)
+    update.message.reply_text(
+        f'سلام {update.effective_user.first_name}!\n'
+        'با نوشتن چند کلمه از یک بیت حافظ، غزل یا بیتی را که \n'
+        'یک بیتش شامل کلمات وارد شده، باشد دریافت خواهی کرد.\n'
+        'در ضمن اگر می خواهی کل یک عبارت با هم (و نه تک تک کلماتش)\n'
+        'در بیت جستجو شود، آن را درون "" بگذار.\n'
+        'همچنین با زدن دستور /fal یک فال می توانی بگیری.\n',
+        reply_markup=reply_markup
+    )
 
 
 def reply_line(update: Update, _: CallbackContext) -> None:
@@ -201,6 +213,7 @@ def main() -> None:
 
     dispatcher = updater.dispatcher
     dispatcher.add_handler(CommandHandler('start', start))
+    dispatcher.add_handler(CommandHandler('help', help_command))
     dispatcher.add_handler(CommandHandler('fal', fal))
     dispatcher.add_handler(CommandHandler('ghazal', reply_ghazal))
     dispatcher.add_handler(CommandHandler('beit', reply_line))
