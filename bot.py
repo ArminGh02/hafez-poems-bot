@@ -181,14 +181,17 @@ def handle_inline_query(update: Update, _: CallbackContext) -> None:
         InlineQueryResultArticle(
             id=str(uuid4()),
             title='فال',
-            input_message_content=InputTextMessageContent(find_fal())),
+            input_message_content=InputTextMessageContent(find_fal())
+        ),
     ]
     for search_result in search_results:
         results.append(
             InlineQueryResultArticle(
                 id=str(uuid4()),
                 title=search_result[:40] + '...',
-                input_message_content=InputTextMessageContent(search_result)))
+                input_message_content=InputTextMessageContent(search_result)
+            )
+        )
 
     update.inline_query.answer(results, switch_pm_text='راهنما ❓', switch_pm_parameter='inline-help')
 
@@ -196,14 +199,15 @@ def handle_inline_query(update: Update, _: CallbackContext) -> None:
 def main() -> None:
     updater = Updater(TOKEN)
 
-    updater.dispatcher.add_handler(CommandHandler('start', start))
-    updater.dispatcher.add_handler(CommandHandler('fal', fal))
-    updater.dispatcher.add_handler(CommandHandler('ghazal', reply_ghazal))
-    updater.dispatcher.add_handler(CommandHandler('beit', reply_line))
-    updater.dispatcher.add_handler(MessageHandler(Filters.regex(SURROUNDED_WITH_DOUBLE_QUOTES), search_string))
-    updater.dispatcher.add_handler(MessageHandler(Filters.text & ~Filters.command, search_words))
-    updater.dispatcher.add_handler(CallbackQueryHandler(button_pressed))
-    updater.dispatcher.add_handler(InlineQueryHandler(handle_inline_query))
+    dispatcher = updater.dispatcher
+    dispatcher.add_handler(CommandHandler('start', start))
+    dispatcher.add_handler(CommandHandler('fal', fal))
+    dispatcher.add_handler(CommandHandler('ghazal', reply_ghazal))
+    dispatcher.add_handler(CommandHandler('beit', reply_line))
+    dispatcher.add_handler(MessageHandler(Filters.regex(SURROUNDED_WITH_DOUBLE_QUOTES), search_string))
+    dispatcher.add_handler(MessageHandler(Filters.text & ~Filters.command, search_words))
+    dispatcher.add_handler(CallbackQueryHandler(button_pressed))
+    dispatcher.add_handler(InlineQueryHandler(handle_inline_query))
 
     updater.start_polling()
 
