@@ -34,13 +34,25 @@ reply_with_line: dict[User, bool] = {}
 to_invoke: Callable[[], None]
 
 
-def start(update: Update, _: CallbackContext) -> None:
-    update.message.reply_text(f'سلام {update.effective_user.first_name}!\n'
-                              'با نوشتن چند کلمه از یک بیت حافظ، غزلی را که \n'
-                              'یک بیتش شامل کلمات وارد شده، باشد دریافت خواهی کرد.\n'
-                              'در ضمن اگر می خواهی کل یک عبارت در بیت جستجو \n'
-                              'شود، آن را درون "" بگذار.\n'
-                              'همچنین با زدن دستور /fal یک فال می توانی بگیری.\n')
+def start(update: Update, context: CallbackContext) -> None:
+    args = context.args
+    if args and args[0] == 'inline-help':
+        update.message.reply_text(
+            'بعد از نوشتن یوزرنیمِ بات در یک چت،\n'
+            'با نوشتن چند کلمه از یک بیت حافظ، غزل یا بیتی را که\n'
+            'یک بیتش شامل کلمات وارد شده، باشد دریافت خواهی کرد.\n'
+            'در ضمن اگر می خواهی کل یک عبارت با هم (و نه تک تک کلماتش)\n'
+            'در بیت جستجو شود، آن را درون "" بگذار.'
+        )
+    else:
+        update.message.reply_text(
+            f'سلام {update.effective_user.first_name}!\n'
+            'با نوشتن چند کلمه از یک بیت حافظ، غزل یا بیتی را که \n'
+            'یک بیتش شامل کلمات وارد شده، باشد دریافت خواهی کرد.\n'
+            'در ضمن اگر می خواهی کل یک عبارت با هم (و نه تک تک کلماتش)\n'
+            'در بیت جستجو شود، آن را درون "" بگذار.\n'
+            'همچنین با زدن دستور /fal یک فال می توانی بگیری.\n'
+        )
 
 
 def reply_line(update: Update, _: CallbackContext) -> None:
