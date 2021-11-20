@@ -5,6 +5,7 @@
 - [Features](#features)
   - [Search for Poems](#search-for-poems)
   - [Get a Random Poem](#get-a-random-poem)
+  - [Inline Query](#inline-query)
 
 ## About
 This is a simple Telegram Bot made mostly for learning purposes.
@@ -21,7 +22,10 @@ First one is done by simply entering the desired words in any order.
 
 And the second is done by surrounding your words with double quotes. (In both ways, the bot acts similar to what Google does.)
 
-The result of your search can be set (via commands) to either return the whole poem or only the matching line
+The result of your search can be set (via commands) to either return the whole poem or only the matching line.
 
 ### Get a Random Poem
 There is a command to get a random poem.
+
+### Inline Query
+The bot also supports inline queries. Meaning that you can type bot username in every telegram chat and then search for a query.
