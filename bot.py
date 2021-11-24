@@ -201,7 +201,10 @@ def button_pressed(update: Update, _: CallbackContext) -> None:
         if update.effective_user not in user_to_favorite_poems:
             user_to_favorite_poems[update.effective_user] = [get_poem(int(query.data))]
         else:
-            user_to_favorite_poems[update.effective_user].append(get_poem(int(query.data)))
+            favorite_poems = user_to_favorite_poems[update.effective_user]
+            poem_to_add = get_poem(int(query.data))
+            if poem_to_add not in favorite_poems:
+                favorite_poems.append(poem_to_add)
 
 
 def handle_inline_query(update: Update, _: CallbackContext) -> None:
