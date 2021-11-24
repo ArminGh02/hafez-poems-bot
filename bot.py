@@ -188,20 +188,22 @@ def choose_result_mode(update: Update) -> None:
 
 def button_pressed(update: Update, _: CallbackContext) -> None:
     query = update.callback_query
-    query.answer()
     if query.data == 'line':
         user_to_reply_with_line[update.effective_user] = True
         query.edit_message_text(text='در نتیجه جستجو بیت دریافت می شود.')
+        query.answer()
         to_invoke()
     elif query.data == 'ghazal':
         user_to_reply_with_line[update.effective_user] = False
         query.edit_message_text(text='در نتیجه جستجو کل غزل دریافت می شود.')
+        query.answer()
         to_invoke()
     else:
         if update.effective_user not in user_to_favorite_poems:
             user_to_favorite_poems[update.effective_user] = {get_poem(int(query.data))}
         else:
             user_to_favorite_poems[update.effective_user].add(get_poem(int(query.data)))
+        query.answer('این غزل به لیست علاقه مندی های شما افزوده شد.')
 
 
 def handle_inline_query(update: Update, _: CallbackContext) -> None:
