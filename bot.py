@@ -24,7 +24,7 @@ from telegram.ext import (
     Updater,
 )
 
-TOKEN = '2071076049:AAGhNzpDhqehljJl4k5sqJ06mevrfwRWiWs'
+TOKEN = '<PLACE YOUR API TOKEN HERE>'
 POEMS_DIRECTORY_NAME = 'divan/'
 POEMS_COUNT = 495
 FAVORITE_POEMS_QUERY = '#favorite_poems'
