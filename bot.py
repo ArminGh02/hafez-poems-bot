@@ -24,7 +24,7 @@ from telegram.ext import (
     Updater,
 )
 
-TOKEN = '<PLACE YOUR API TOKEN HERE>'
+TOKEN = '1971310681:AAGKBbuiXYl29QektV0oKWmMLXN1jRrC94M'
 POEMS_DIRECTORY_NAME = 'divan/'
 POEMS_COUNT = 495
 FAVORITE_POEMS_QUERY = '#favorite_poems'
@@ -264,7 +264,12 @@ def main() -> None:
     dispatcher.add_handler(CommandHandler('beit', reply_line))
     dispatcher.add_handler(CommandHandler('favorite', list_favorite_poems))
     dispatcher.add_handler(MessageHandler(Filters.regex(SURROUNDED_WITH_DOUBLE_QUOTES), search_string))
-    dispatcher.add_handler(MessageHandler(Filters.text & ~Filters.command & ~Filters.via_bot, search_words))
+    dispatcher.add_handler(
+        MessageHandler(
+            Filters.text & ~Filters.command & ~Filters.via_bot(username='hafez_poems_bot'),
+            search_words
+        )
+    )
     dispatcher.add_handler(CallbackQueryHandler(button_pressed))
     dispatcher.add_handler(InlineQueryHandler(handle_inline_query))
 
