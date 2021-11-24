@@ -264,7 +264,7 @@ def main() -> None:
     dispatcher.add_handler(CommandHandler('beit', reply_line))
     dispatcher.add_handler(CommandHandler('favorite', list_favorite_poems))
     dispatcher.add_handler(MessageHandler(Filters.regex(SURROUNDED_WITH_DOUBLE_QUOTES), search_string))
-    dispatcher.add_handler(MessageHandler(Filters.text & ~Filters.command, search_words))
+    dispatcher.add_handler(MessageHandler(Filters.text & ~Filters.command & ~Filters.via_bot, search_words))
     dispatcher.add_handler(CallbackQueryHandler(button_pressed))
     dispatcher.add_handler(InlineQueryHandler(handle_inline_query))
 
