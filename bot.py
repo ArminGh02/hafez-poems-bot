@@ -31,7 +31,7 @@ FAVORITE_POEMS_QUERY = '#favorite_poems'
 SURROUNDED_WITH_DOUBLE_QUOTES = r'"[\u0600-\u06FF\s]+"'
 NO_MATCH_WAS_FOUND = 'هیچ بیتی با کلمات فرستاده شده پیدا نشد.'
 
-user_to_favorite_poems: dict[User, list[str]] = {}
+user_to_favorite_poems: dict[User, set[str]] = {}
 user_to_reply_with_line: dict[User, bool] = {}
 to_invoke: Callable[[], None]
 
@@ -54,7 +54,7 @@ def start(update: Update, context: CallbackContext) -> None:
         )
     else:
         help_command(update, context)
-        user_to_favorite_poems[update.effective_user] = []
+        user_to_favorite_poems[update.effective_user] = set()
 
 
 def help_command(update: Update, _: CallbackContext) -> None:
@@ -199,12 +199,9 @@ def button_pressed(update: Update, _: CallbackContext) -> None:
         to_invoke()
     else:
         if update.effective_user not in user_to_favorite_poems:
-            user_to_favorite_poems[update.effective_user] = [get_poem(int(query.data))]
+            user_to_favorite_poems[update.effective_user] = {get_poem(int(query.data))}
         else:
-            favorite_poems = user_to_favorite_poems[update.effective_user]
-            poem_to_add = get_poem(int(query.data))
-            if poem_to_add not in favorite_poems:
-                favorite_poems.append(poem_to_add)
+            user_to_favorite_poems[update.effective_user].add(get_poem(int(query.data)))
 
 
 def handle_inline_query(update: Update, _: CallbackContext) -> None:
