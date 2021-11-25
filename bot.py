@@ -94,8 +94,7 @@ def random_poem_command(update: Update, _: CallbackContext) -> None:
 
 def get_poem_keyboard_markup(poem_number: int) -> InlineKeyboardMarkup:
     keyboard = [[InlineKeyboardButton('افزودن به غزل های مورد علاقه ❤️', callback_data=str(poem_number))]]
-    reply_markup = InlineKeyboardMarkup(keyboard)
-    return reply_markup
+    return InlineKeyboardMarkup(keyboard)
 
 
 def get_random_poem() -> tuple[int, str]:
@@ -236,7 +235,7 @@ def handle_inline_query(update: Update, _: CallbackContext) -> None:
                 reply_markup=get_poem_keyboard_markup(poem_number)
             )
         )
-    if favorite_poems_queried or user_to_reply_with_line[user]:
+    if favorite_poems_queried or (user in user_to_reply_with_line and user_to_reply_with_line[user]):
         for search_result in search_results:
             results.append(
                 InlineQueryResultArticle(
