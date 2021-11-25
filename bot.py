@@ -158,18 +158,16 @@ def find_results(update: Update,
     results = []
     found_match = False
     for i in range(1, POEMS_COUNT + 1):
-        poem_filename = POEMS_DIRECTORY_NAME + 'ghazal' + str(i) + '.txt'
-        with open(poem_filename, encoding='utf8') as poem:
-            poem_text = poem.read()
-            lines = poem_text.splitlines()
-            j = index_of_matched_line(lines, to_search)
-            if j > -1:
-                found_match = True
-                if user_to_reply_with_line[update.effective_user]:
-                    result = lines[j - 1] + '\n' + lines[j] + '\n' + lines[j + 1]
-                    results.append(result)
-                else:
-                    results.append((i, poem_text))
+        poem = get_poem(i)
+        lines = poem.splitlines()
+        j = index_of_matched_line(lines, to_search)
+        if j > -1:
+            found_match = True
+            if user_to_reply_with_line[update.effective_user]:
+                result = lines[j - 1] + '\n' + lines[j] + '\n' + lines[j + 1]
+                results.append(result)
+            else:
+                results.append((i, poem))
 
     if not found_match:
         results.append(NO_MATCH_WAS_FOUND)
