@@ -88,11 +88,19 @@ def reply_ghazal(update: Update, _: CallbackContext) -> None:
 
 
 def random_poem_command(update: Update, _: CallbackContext) -> None:
-    update.message.reply_text(get_random_poem())
+    poem_number, poem = get_random_poem()
+    update.message.reply_text(poem, reply_markup=get_poem_keyboard_markup(poem_number))
 
 
-def get_random_poem() -> str:
-    return get_poem(randrange(1, POEMS_COUNT))
+def get_poem_keyboard_markup(poem_number: int) -> InlineKeyboardMarkup:
+    keyboard = [[InlineKeyboardButton('افزودن به غزل های مورد علاقه ❤️', callback_data=str(poem_number))]]
+    reply_markup = InlineKeyboardMarkup(keyboard)
+    return reply_markup
+
+
+def get_random_poem() -> tuple[int, str]:
+    rand = randrange(1, POEMS_COUNT)
+    return rand, get_poem(rand)
 
 
 def list_favorite_poems(update: Update, _: CallbackContext) -> None:
@@ -122,9 +130,7 @@ def search_impl(update: Update, to_search: Union[str, list[str]]) -> None:
                 update.message.reply_text(poem)
         else:
             for poem_number, poem in results:
-                keyboard = [[InlineKeyboardButton('افزودن به غزل های مورد علاقه ❤️', callback_data=str(poem_number))]]
-                reply_markup = InlineKeyboardMarkup(keyboard)
-                update.message.reply_text(poem, reply_markup=reply_markup)
+                update.message.reply_text(poem, reply_markup=get_poem_keyboard_markup(poem_number))
 
     if update.effective_user not in user_to_reply_with_line:
         choose_result_mode(update)
@@ -151,7 +157,7 @@ def index_of_matched_line_string(lines: list[str], to_search: str) -> int:
 def find_results(update: Update,
                  to_search: Union[str, list[str]],
                  index_of_matched_line: Union[Callable[[list[str], str], int], Callable[[list[str], list[str]], int]]
-                 ) -> Union[list[str], list[tuple[str]]]:
+                 ) -> list[str]:
     if update.effective_user not in user_to_reply_with_line:
         user_to_reply_with_line[update.effective_user] = True
 
@@ -221,12 +227,14 @@ def handle_inline_query(update: Update, _: CallbackContext) -> None:
 
     results = []
     if not favorite_poems_queried:
+        poem_number, poem = get_random_poem()
         results.append(
             InlineQueryResultArticle(
                 id=str(uuid4()),
                 title='فال',
-                input_message_content=InputTextMessageContent(get_random_poem())
-            ),
+                input_message_content=InputTextMessageContent(poem),
+                reply_markup=get_poem_keyboard_markup(poem_number)
+            )
         )
     if favorite_poems_queried or user_to_reply_with_line[user]:
         for search_result in search_results:
@@ -238,12 +246,13 @@ def handle_inline_query(update: Update, _: CallbackContext) -> None:
                 )
             )
     else:
-        for _, search_result in search_results:
+        for poem_number, poem in search_results:
             results.append(
                 InlineQueryResultArticle(
                     id=str(uuid4()),
-                    title=search_result[:40] + '...',
-                    input_message_content=InputTextMessageContent(search_result),
+                    title=poem[:40] + '...',
+                    input_message_content=InputTextMessageContent(poem),
+                    reply_markup=get_poem_keyboard_markup(poem_number)
                 )
             )
 
