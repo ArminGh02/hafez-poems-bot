@@ -151,7 +151,7 @@ def index_of_matched_line_string(lines: list[str], to_search: str) -> int:
 def find_results(update: Update,
                  to_search: Union[str, list[str]],
                  index_of_matched_line: Union[Callable[[list[str], str], int], Callable[[list[str], list[str]], int]]
-                 ) -> list[str]:
+                 ) -> Union[list[str], list[tuple[str]]]:
     if update.effective_user not in user_to_reply_with_line:
         user_to_reply_with_line[update.effective_user] = True
 
