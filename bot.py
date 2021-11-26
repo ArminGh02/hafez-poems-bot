@@ -162,16 +162,21 @@ def find_results(update: Update,
 
     results = []
     found_match = False
-    for i in range(1, POEMS_COUNT + 1):
-        poem = get_poem(i)
-        lines = poem.splitlines()
-        j = index_of_matched_line(lines, to_search)
-        if j > -1:
-            found_match = True
-            if user_to_reply_with_line[update.effective_user]:
+    if user_to_reply_with_line[update.effective_user]:
+        for i in range(1, POEMS_COUNT + 1):
+            lines = get_poem(i).splitlines()
+            j = index_of_matched_line(lines, to_search)
+            if j > -1:
+                found_match = True
                 result = lines[j - 1] + '\n' + lines[j] + '\n' + lines[j + 1]
                 results.append(result)
-            else:
+    else:
+        for i in range(1, POEMS_COUNT + 1):
+            poem = get_poem(i)
+            lines = poem.splitlines()
+            j = index_of_matched_line(lines, to_search)
+            if j > -1:
+                found_match = True
                 results.append((i, poem))
 
     if not found_match:
@@ -240,7 +245,7 @@ def handle_inline_query(update: Update, _: CallbackContext) -> None:
             results.append(
                 InlineQueryResultArticle(
                     id=str(uuid4()),
-                    title=search_result[:40] + '...',
+                    title=search_result[:60] + '...',
                     input_message_content=InputTextMessageContent(search_result),
                 )
             )
@@ -249,7 +254,7 @@ def handle_inline_query(update: Update, _: CallbackContext) -> None:
             results.append(
                 InlineQueryResultArticle(
                     id=str(uuid4()),
-                    title=poem[:40] + '...',
+                    title=poem[:60] + '...',
                     input_message_content=InputTextMessageContent(poem),
                     reply_markup=get_poem_keyboard_markup(poem_number)
                 )
