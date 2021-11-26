@@ -61,8 +61,8 @@ def help_command(update: Update, _: CallbackContext) -> None:
     keyboard = [
         [
             InlineKeyboardButton('Github', 'https://github.com/ArminGh02/hafez-poems-telegram-bot'),
-            InlineKeyboardButton('Developer', 'https://telegram.me/ArminGh02')
-        ]
+            InlineKeyboardButton('Developer', 'https://telegram.me/ArminGh02'),
+        ],
     ]
     reply_markup = InlineKeyboardMarkup(keyboard)
     update.message.reply_text(
@@ -73,7 +73,7 @@ def help_command(update: Update, _: CallbackContext) -> None:
         'در بیت جستجو شود، آن را درون "" بگذار.\n'
         'همچنین با زدن دستور /fal یک فال می توانی بگیری.\n'
         f'تعداد کاربران: {max(len(user_to_reply_with_line), len(user_to_favorite_poems))}',
-        reply_markup=reply_markup
+        reply_markup=reply_markup,
     )
 
 
@@ -104,7 +104,7 @@ def get_random_poem() -> tuple[int, str]:
 
 def list_favorite_poems(update: Update, _: CallbackContext) -> None:
     keyboard = [
-        [InlineKeyboardButton('لیست غزل های مورد علاقه ❤️', switch_inline_query_current_chat=FAVORITE_POEMS_QUERY)]
+        [InlineKeyboardButton('لیست غزل های مورد علاقه ❤️', switch_inline_query_current_chat=FAVORITE_POEMS_QUERY)],
     ]
     reply_markup = InlineKeyboardMarkup(keyboard)
     update.message.reply_text('دکمه زیر را بزن.', reply_markup=reply_markup)
@@ -237,7 +237,7 @@ def handle_inline_query(update: Update, _: CallbackContext) -> None:
                 id=str(uuid4()),
                 title='فال',
                 input_message_content=InputTextMessageContent(poem),
-                reply_markup=get_poem_keyboard_markup(poem_number)
+                reply_markup=get_poem_keyboard_markup(poem_number),
             )
         )
     if favorite_poems_queried or (user in user_to_reply_with_line and user_to_reply_with_line[user]):
@@ -256,7 +256,7 @@ def handle_inline_query(update: Update, _: CallbackContext) -> None:
                     id=str(uuid4()),
                     title=poem[:60] + '...',
                     input_message_content=InputTextMessageContent(poem),
-                    reply_markup=get_poem_keyboard_markup(poem_number)
+                    reply_markup=get_poem_keyboard_markup(poem_number),
                 )
             )
 
