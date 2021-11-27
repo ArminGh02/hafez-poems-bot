@@ -204,9 +204,9 @@ def handle_inline_query(update: Update, _: CallbackContext) -> None:
         if user in user_to_favorite_poems:
             search_results = user_to_favorite_poems[user]
     elif compile(SURROUNDED_WITH_DOUBLE_QUOTES).match(query):
-        search_results = find_results(update, query[1:-1], index_of_matched_line_string)
+        search_results = find_results(update, query[1:-1])
     elif compile(persian_words).match(query):
-        search_results = find_results(update, query.split(), index_of_matched_line_words)
+        search_results = find_results(update, query.split())
 
     results = []
     if not favorite_poems_queried:
