@@ -1,6 +1,6 @@
+from file_util import get_poem
 from config import (
     API_TOKEN,
-    POEMS_DIRECTORY,
     POEMS_COUNT,
 )
 from search import (
@@ -44,12 +44,6 @@ searcher = Searcher()
 user_to_favorite_poems: dict[User, set[str]] = {}
 user_to_reply_with_line: dict[User, bool] = {}
 to_invoke: Callable[[], None]
-
-
-def get_poem(poem_number: int) -> str:
-    poem_filename = POEMS_DIRECTORY + 'ghazal' + str(poem_number) + '.txt'
-    with open(poem_filename, encoding='utf8') as poem:
-        return poem.read()
 
 
 def start(update: Update, context: CallbackContext) -> None:

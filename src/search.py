@@ -1,7 +1,5 @@
-from main import (
-    get_poem,
-    POEMS_COUNT
-)
+from config import POEMS_COUNT
+from file_util import get_poem
 
 from typing import (
     Callable,
