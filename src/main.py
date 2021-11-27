@@ -1,3 +1,9 @@
+from search import (
+    Searcher,
+    index_of_matched_line_string,
+    index_of_matched_line_words,
+)
+
 from random import randrange
 from re import compile
 from typing import (
@@ -31,6 +37,7 @@ FAVORITE_POEMS_QUERY = '#favorite_poems'
 SURROUNDED_WITH_DOUBLE_QUOTES = r'"[\u0600-\u06FF\s]+"'
 NO_MATCH_WAS_FOUND = 'هیچ بیتی با کلمات فرستاده شده پیدا نشد.'
 
+searcher = Searcher()
 user_to_favorite_poems: dict[User, set[str]] = {}
 user_to_reply_with_line: dict[User, bool] = {}
 to_invoke: Callable[[], None]
@@ -121,17 +128,19 @@ def search_string(update: Update, _: CallbackContext) -> None:
 
 
 def search_impl(update: Update, to_search: Union[str, list[str]]) -> None:
+    user = update.effective_user
+
     def send_results() -> None:
         to_call = index_of_matched_line_string if isinstance(to_search, str) else index_of_matched_line_words
         results = find_results(update, to_search, to_call)
-        if user_to_reply_with_line[update.effective_user]:
+        if user_to_reply_with_line[user]:
             for poem in results:
                 update.message.reply_text(poem)
         else:
             for poem_number, poem in results:
                 update.message.reply_text(poem, reply_markup=get_poem_keyboard_markup(poem_number))
 
-    if update.effective_user not in user_to_reply_with_line:
+    if user not in user_to_reply_with_line:
         choose_result_mode(update)
         global to_invoke
         to_invoke = send_results
@@ -139,48 +148,24 @@ def search_impl(update: Update, to_search: Union[str, list[str]]) -> None:
         send_results()
 
 
-def index_of_matched_line_words(lines: list[str], words_to_search: list[str]) -> int:
-    for i, line in enumerate(lines):
-        if all(word in line for word in words_to_search):
-            return i
-    return -1
+def find_results(
+        update: Update,
+        to_search: Union[str, list[str]],
+        index_of_matched_line: Union[Callable[[list[str], str], int], Callable[[list[str], list[str]], int]]
+) -> Union[list[str], list[tuple[str]]]:
+    user = update.effective_user
 
+    if user not in user_to_reply_with_line:
+        user_to_reply_with_line[user] = True
 
-def index_of_matched_line_string(lines: list[str], to_search: str) -> int:
-    for i, line in enumerate(lines):
-        if to_search in line:
-            return i
-    return -1
-
-
-def find_results(update: Update,
-                 to_search: Union[str, list[str]],
-                 index_of_matched_line: Union[Callable[[list[str], str], int], Callable[[list[str], list[str]], int]]
-                 ) -> list[str]:
-    if update.effective_user not in user_to_reply_with_line:
-        user_to_reply_with_line[update.effective_user] = True
-
-    results = []
-    found_match = False
-    if user_to_reply_with_line[update.effective_user]:
-        for i in range(1, POEMS_COUNT + 1):
-            lines = get_poem(i).splitlines()
-            j = index_of_matched_line(lines, to_search)
-            if j > -1:
-                found_match = True
-                result = lines[j - 1] + '\n' + lines[j] + '\n' + lines[j + 1]
-                results.append(result)
+    results: Union[list[str], list[tuple[str]]]
+    if user_to_reply_with_line[user]:
+        results = searcher.search_return_lines(to_search, index_of_matched_line)
     else:
-        for i in range(1, POEMS_COUNT + 1):
-            poem = get_poem(i)
-            lines = poem.splitlines()
-            j = index_of_matched_line(lines, to_search)
-            if j > -1:
-                found_match = True
-                results.append((i, poem))
+        results = searcher.search_return_poems(to_search, index_of_matched_line)
 
-    if not found_match:
-        results.append(NO_MATCH_WAS_FOUND)
+    if not results:
+        results.append(NO_MATCH_WAS_FOUND if user_to_reply_with_line[user] else (-1, NO_MATCH_WAS_FOUND))
 
     return results
 
@@ -196,21 +181,22 @@ def choose_result_mode(update: Update) -> None:
 
 def button_pressed(update: Update, _: CallbackContext) -> None:
     query = update.callback_query
+    user = update.effective_user
     if query.data == 'line':
-        user_to_reply_with_line[update.effective_user] = True
+        user_to_reply_with_line[user] = True
         query.edit_message_text(text='در نتیجه جستجو بیت دریافت می شود.')
         query.answer()
         to_invoke()
     elif query.data == 'ghazal':
-        user_to_reply_with_line[update.effective_user] = False
+        user_to_reply_with_line[user] = False
         query.edit_message_text(text='در نتیجه جستجو کل غزل دریافت می شود.')
         query.answer()
         to_invoke()
     else:
-        if update.effective_user not in user_to_favorite_poems:
-            user_to_favorite_poems[update.effective_user] = {get_poem(int(query.data))}
+        if user not in user_to_favorite_poems:
+            user_to_favorite_poems[user] = {get_poem(int(query.data))}
         else:
-            user_to_favorite_poems[update.effective_user].add(get_poem(int(query.data)))
+            user_to_favorite_poems[user].add(get_poem(int(query.data)))
         query.answer('این غزل به لیست علاقه مندی های شما افزوده شد.')
 
 
