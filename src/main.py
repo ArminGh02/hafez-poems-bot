@@ -131,8 +131,7 @@ def search_impl(update: Update, to_search: Union[str, list[str]]) -> None:
     user = update.effective_user
 
     def send_results() -> None:
-        to_call = index_of_matched_line_string if isinstance(to_search, str) else index_of_matched_line_words
-        results = find_results(update, to_search, to_call)
+        results = find_results(update, to_search)
         if user_to_reply_with_line[user]:
             for poem in results:
                 update.message.reply_text(poem)
@@ -148,17 +147,14 @@ def search_impl(update: Update, to_search: Union[str, list[str]]) -> None:
         send_results()
 
 
-def find_results(
-        update: Update,
-        to_search: Union[str, list[str]],
-        index_of_matched_line: Union[Callable[[list[str], str], int], Callable[[list[str], list[str]], int]]
-) -> Union[list[str], list[tuple[str]]]:
+def find_results(update: Update, to_search: Union[str, list[str]]) -> Union[list[str], list[tuple[str]]]:
     user = update.effective_user
 
     if user not in user_to_reply_with_line:
         user_to_reply_with_line[user] = True
 
     results: Union[list[str], list[tuple[str]]]
+    index_of_matched_line = index_of_matched_line_string if isinstance(to_search, str) else index_of_matched_line_words
     if user_to_reply_with_line[user]:
         results = searcher.search_return_lines(to_search, index_of_matched_line)
     else:
