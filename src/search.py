@@ -28,7 +28,7 @@ class Searcher:
     def search_return_poems(
             self,
             to_search: Union[str, list[str]],
-            index_of_matched_line: Union[Callable[[list[str], list[str]], int], Callable[[list[str], str], int]],
+            index_of_matched_line: Union[Callable[[list[str], str], int], Callable[[list[str], list[str]], int]],
     ) -> list[tuple[int, str]]:
         results = []
         for i in range(1, POEMS_COUNT + 1):
