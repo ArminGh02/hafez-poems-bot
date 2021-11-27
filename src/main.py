@@ -1,3 +1,8 @@
+from config import (
+    API_TOKEN,
+    POEMS_DIRECTORY,
+    POEMS_COUNT,
+)
 from search import (
     Searcher,
     index_of_matched_line_string,
@@ -30,9 +35,7 @@ from telegram.ext import (
     Updater,
 )
 
-TOKEN = '<PLACE YOUR API TOKEN HERE>'
-POEMS_DIRECTORY_NAME = 'divan/'
-POEMS_COUNT = 495
+
 FAVORITE_POEMS_QUERY = '#favorite_poems'
 SURROUNDED_WITH_DOUBLE_QUOTES = r'"[\u0600-\u06FF\s]+"'
 NO_MATCH_WAS_FOUND = 'هیچ بیتی با کلمات فرستاده شده پیدا نشد.'
@@ -44,7 +47,7 @@ to_invoke: Callable[[], None]
 
 
 def get_poem(poem_number: int) -> str:
-    poem_filename = POEMS_DIRECTORY_NAME + 'ghazal' + str(poem_number) + '.txt'
+    poem_filename = POEMS_DIRECTORY + 'ghazal' + str(poem_number) + '.txt'
     with open(poem_filename, encoding='utf8') as poem:
         return poem.read()
 
@@ -249,7 +252,7 @@ def handle_inline_query(update: Update, _: CallbackContext) -> None:
 
 
 def main() -> None:
-    updater = Updater(TOKEN)
+    updater = Updater(API_TOKEN)
 
     dispatcher = updater.dispatcher
     dispatcher.add_handler(CommandHandler('start', start))
