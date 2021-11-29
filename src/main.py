@@ -10,7 +10,7 @@ from search import (
 )
 
 from random import randrange
-from re import compile
+from re import match
 from typing import (
     Callable,
     Union,
@@ -203,9 +203,9 @@ def handle_inline_query(update: Update, _: CallbackContext) -> None:
     if favorite_poems_queried:
         if user in user_to_favorite_poems:
             search_results = user_to_favorite_poems[user]
-    elif compile(SURROUNDED_WITH_DOUBLE_QUOTES).match(query):
+    elif match(SURROUNDED_WITH_DOUBLE_QUOTES, query):
         search_results = find_results(update, query[1:-1])
-    elif compile(persian_words).match(query):
+    elif match(persian_words, query):
         search_results = find_results(update, query.split())
 
     results = []
