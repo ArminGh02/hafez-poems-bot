@@ -150,7 +150,7 @@ def find_results(update: Update, to_search: Union[str, list[str]]) -> Union[list
     if user not in user_to_reply_with_line:
         user_to_reply_with_line[user] = True
 
-    results: Union[list[str], list[tuple[str]]]
+    results: Union[list[str], list[tuple[int, str]]]
     index_of_matched_line = index_of_matched_line_string if isinstance(to_search, str) else index_of_matched_line_words
     if user_to_reply_with_line[user]:
         results = searcher.search_return_lines(to_search, index_of_matched_line)
