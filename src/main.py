@@ -38,7 +38,7 @@ from telegram.ext import (
 
 FAVORITE_POEMS_QUERY = '#favorite_poems'
 SURROUNDED_WITH_DOUBLE_QUOTES = r'"[\u0600-\u06FF\s]+"'
-NO_MATCH_WAS_FOUND = 'هیچ بیتی با کلمات فرستاده شده پیدا نشد.'
+NO_MATCH_WAS_FOUND = 'جستجو نتیجه ای در بر نداشت ❗️'
 
 searcher = Searcher()
 user_to_favorite_poems: dict[User, set[str]] = {}
@@ -129,7 +129,9 @@ def search_impl(update: Update, to_search: Union[str, list[str]]) -> None:
 
     def send_results() -> None:
         results = find_results(update, to_search)
-        if user_to_reply_with_line[user]:
+        if not results:
+            update.message.reply_text(NO_MATCH_WAS_FOUND)
+        elif user_to_reply_with_line[user]:
             for poem in results:
                 update.message.reply_text(poem)
         else:
@@ -156,9 +158,6 @@ def find_results(update: Update, to_search: Union[str, list[str]]) -> Union[list
         results = searcher.search_return_lines(to_search, index_of_matched_line)
     else:
         results = searcher.search_return_poems(to_search, index_of_matched_line)
-
-    if not results:
-        results.append(NO_MATCH_WAS_FOUND if user_to_reply_with_line[user] else (-1, NO_MATCH_WAS_FOUND))
 
     return results
 
@@ -193,33 +192,56 @@ def button_pressed(update: Update, _: CallbackContext) -> None:
         query.answer('این غزل به لیست علاقه مندی های شما افزوده شد.')
 
 
+def handle_favorite_poems_inline_query(update: Update, _: CallbackContext) -> None:
+    user = update.effective_user
+    if user not in user_to_favorite_poems:
+        update.inline_query.answer(
+            results=[],
+            switch_pm_text='لیست علاقه‌مندی‌های شما خالی است ❗️',
+            switch_pm_parameter='no-favorite-poems'
+        )
+        return
+
+    favorite_poems = user_to_favorite_poems[user]
+    results = []
+    for poem in favorite_poems:
+        results.append(
+            InlineQueryResultArticle(
+                id=str(uuid4()),
+                title=poem[:60] + '...',
+                input_message_content=InputTextMessageContent(poem),
+            )
+        )
+
+    update.inline_query.answer(results)
+
+
 def handle_inline_query(update: Update, _: CallbackContext) -> None:
     query = update.inline_query.query
     user = update.effective_user
 
-    favorite_poems_queried = query == FAVORITE_POEMS_QUERY
     persian_words = r'[\u0600-\u06FF\s]+'
     search_results = []
-    if favorite_poems_queried:
-        if user in user_to_favorite_poems:
-            search_results = user_to_favorite_poems[user]
-    elif match(SURROUNDED_WITH_DOUBLE_QUOTES, query):
+    if match(SURROUNDED_WITH_DOUBLE_QUOTES, query):
         search_results = find_results(update, query[1:-1])
     elif match(persian_words, query):
         search_results = find_results(update, query.split())
 
-    results = []
-    if not favorite_poems_queried:
-        poem_number, poem = get_random_poem()
-        results.append(
-            InlineQueryResultArticle(
-                id=str(uuid4()),
-                title='فال',
-                input_message_content=InputTextMessageContent(poem),
-                reply_markup=get_poem_keyboard_markup(poem_number),
-            )
-        )
-    if favorite_poems_queried or (user in user_to_reply_with_line and user_to_reply_with_line[user]):
+    poem_number, poem = get_random_poem()
+    results = [
+        InlineQueryResultArticle(
+            id=str(uuid4()),
+            title='فال',
+            input_message_content=InputTextMessageContent(poem),
+            reply_markup=get_poem_keyboard_markup(poem_number),
+        ),
+    ]
+
+    if not search_results:
+        update.inline_query.answer(results, switch_pm_text=NO_MATCH_WAS_FOUND, switch_pm_parameter='no-match')
+        return
+
+    if user in user_to_reply_with_line and user_to_reply_with_line[user]:
         for search_result in search_results:
             results.append(
                 InlineQueryResultArticle(
@@ -239,10 +261,7 @@ def handle_inline_query(update: Update, _: CallbackContext) -> None:
                 )
             )
 
-    if favorite_poems_queried:
-        update.inline_query.answer(results)
-    else:
-        update.inline_query.answer(results, switch_pm_text='راهنما ❓', switch_pm_parameter='inline-help')
+    update.inline_query.answer(results, switch_pm_text='راهنما ❓', switch_pm_parameter='inline-help')
 
 
 def main() -> None:
@@ -263,6 +282,7 @@ def main() -> None:
         )
     )
     dispatcher.add_handler(CallbackQueryHandler(button_pressed))
+    dispatcher.add_handler(InlineQueryHandler(handle_favorite_poems_inline_query, pattern=FAVORITE_POEMS_QUERY))
     dispatcher.add_handler(InlineQueryHandler(handle_inline_query))
 
     updater.start_polling()
