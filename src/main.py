@@ -48,14 +48,15 @@ to_invoke: Callable[[], None]
 
 def start(update: Update, context: CallbackContext) -> None:
     args = context.args
-    if args and args[0] == 'inline-help':
-        update.message.reply_text(
-            'بعد از نوشتن یوزرنیمِ بات در یک چت،\n'
-            'با نوشتن چند کلمه از یک بیت حافظ، غزل یا بیتی را که\n'
-            'یک بیتش شامل کلمات وارد شده، باشد دریافت خواهی کرد.\n'
-            'در ضمن اگر می خواهی کل یک عبارت با هم (و نه تک تک کلماتش)\n'
-            'در بیت جستجو شود، آن را درون "" بگذار.'
-        )
+    if args:
+        if args[0] == 'inline-help':
+            update.message.reply_text(
+                'بعد از نوشتن یوزرنیمِ بات در یک چت،\n'
+                'با نوشتن چند کلمه از یک بیت حافظ، غزل یا بیتی را که\n'
+                'یک بیتش شامل کلمات وارد شده، باشد دریافت خواهی کرد.\n'
+                'در ضمن اگر می خواهی کل یک عبارت با هم (و نه تک تک کلماتش)\n'
+                'در بیت جستجو شود، آن را درون "" بگذار.'
+            )
     else:
         help_command(update, context)
         user_to_favorite_poems[update.effective_user] = set()
@@ -200,21 +201,26 @@ def add_to_favorite_poems(update: Update, _: CallbackContext) -> None:
     query = update.callback_query
 
     poem_number = int(query.data.removeprefix('add'))
+    poem = get_poem(poem_number)
     if user not in user_to_favorite_poems:
-        user_to_favorite_poems[user] = {(poem_number, get_poem(poem_number))}
+        user_to_favorite_poems[user] = {(poem_number, poem)}
     else:
-        user_to_favorite_poems[user].add((poem_number, get_poem(poem_number)))
+        user_to_favorite_poems[user].add((poem_number, poem))
 
+    query.edit_message_reply_markup(get_poem_keyboard(poem_number, poem, user))
     query.answer('این غزل به لیست علاقه‌مندی‌های شما افزوده شد.')
 
 
 def remove_from_favorite_poems(update: Update, _: CallbackContext) -> None:
+    user = update.effective_user
     query = update.callback_query
 
     poem_number = int(query.data.removeprefix('remove'))
-    user_to_favorite_poems[update.effective_user].remove((poem_number, get_poem(poem_number)))
-    query.answer('این غزل از لیست علاقه‌مندی‌های شما حذف شد.')
+    poem = get_poem(poem_number)
+    user_to_favorite_poems[user].remove((poem_number, poem))
 
+    query.edit_message_reply_markup(get_poem_keyboard(poem_number, poem, user))
+    query.answer('این غزل از لیست علاقه‌مندی‌های شما حذف شد.')
 
 def handle_favorite_poems_inline_query(update: Update, _: CallbackContext) -> None:
     user = update.effective_user
