@@ -37,7 +37,7 @@ from telegram.ext import (
 
 
 FAVORITE_POEMS_QUERY = '#favorite_poems'
-SURROUNDED_WITH_DOUBLE_QUOTES = r'"[\u0600-\u06FF\s]+"'
+SURROUNDED_WITH_DOUBLE_QUOTES = r'^"[\u0600-\u06FF\s]+"$'
 NO_MATCH_WAS_FOUND = 'جستجو نتیجه ای در بر نداشت❗️'
 
 searcher = Searcher()
@@ -222,6 +222,7 @@ def remove_from_favorite_poems(update: Update, _: CallbackContext) -> None:
     query.edit_message_reply_markup(get_poem_keyboard(poem_number, poem, user))
     query.answer('این غزل از لیست علاقه‌مندی‌های شما حذف شد.')
 
+
 def handle_favorite_poems_inline_query(update: Update, _: CallbackContext) -> None:
     user = update.effective_user
     if user not in user_to_favorite_poems or not user_to_favorite_poems[user]:
@@ -251,7 +252,7 @@ def handle_inline_query(update: Update, _: CallbackContext) -> None:
     query = update.inline_query.query
     user = update.effective_user
 
-    persian_words = r'[\u0600-\u06FF\s]+'
+    persian_words = r'^[\u0600-\u06FF\s]+$'
     search_results = []
     if match(SURROUNDED_WITH_DOUBLE_QUOTES, query):
         search_results = find_results(update, query[1:-1])
@@ -314,9 +315,9 @@ def main() -> None:
         )
     )
 
-    dispatcher.add_handler(CallbackQueryHandler(result_mode_chosen, pattern=r'poem|line'))
-    dispatcher.add_handler(CallbackQueryHandler(add_to_favorite_poems, pattern=r'add([0-9]+)'))
-    dispatcher.add_handler(CallbackQueryHandler(remove_from_favorite_poems, pattern=r'remove([0-9]+)'))
+    dispatcher.add_handler(CallbackQueryHandler(result_mode_chosen, pattern=r'^(poem|line)$'))
+    dispatcher.add_handler(CallbackQueryHandler(add_to_favorite_poems, pattern=r'^add\d{1,3}$'))
+    dispatcher.add_handler(CallbackQueryHandler(remove_from_favorite_poems, pattern=r'^remove\d{1,3}$'))
 
     dispatcher.add_handler(InlineQueryHandler(handle_favorite_poems_inline_query, pattern=FAVORITE_POEMS_QUERY))
     dispatcher.add_handler(InlineQueryHandler(handle_inline_query))
