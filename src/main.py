@@ -225,7 +225,7 @@ def remove_from_favorite_poems(update: Update, _: CallbackContext) -> None:
 
 def handle_favorite_poems_inline_query(update: Update, _: CallbackContext) -> None:
     user = update.effective_user
-    if user not in user_to_favorite_poems or not user_to_favorite_poems[user]:
+    if not user_to_favorite_poems.get(user):
         update.inline_query.answer(
             results=[],
             switch_pm_text='لیست علاقه‌مندی‌های شما خالی است ❗️',
