@@ -36,6 +36,7 @@ from telegram.ext import (
 )
 
 
+INLINE_HELP = 'inline-help'
 FAVORITE_POEMS_QUERY = '#favorite_poems'
 SURROUNDED_WITH_DOUBLE_QUOTES = r'^"[\u0600-\u06FF\s]+"$'
 NO_MATCH_WAS_FOUND = 'جستجو نتیجه ای در بر نداشت❗️'
@@ -49,7 +50,7 @@ to_invoke: Callable[[], None]
 def start(update: Update, context: CallbackContext) -> None:
     args = context.args
     if args:
-        if args[0] == 'inline-help':
+        if args[0] == INLINE_HELP:
             update.message.reply_text(
                 'بعد از نوشتن یوزرنیمِ بات در یک چت،\n'
                 'با نوشتن چند کلمه از یک بیت حافظ، غزل یا بیتی را که\n'
@@ -270,7 +271,7 @@ def handle_inline_query(update: Update, _: CallbackContext) -> None:
     ]
 
     if not search_results:
-        update.inline_query.answer(results, switch_pm_text=NO_MATCH_WAS_FOUND, switch_pm_parameter='no-match')
+        update.inline_query.answer(results, switch_pm_text=NO_MATCH_WAS_FOUND, switch_pm_parameter=INLINE_HELP)
         return
 
     if user in user_to_reply_with_line and user_to_reply_with_line[user]:
@@ -293,7 +294,7 @@ def handle_inline_query(update: Update, _: CallbackContext) -> None:
                 )
             )
 
-    update.inline_query.answer(results, cache_time=3, switch_pm_text='راهنما ❓', switch_pm_parameter='inline-help')
+    update.inline_query.answer(results, cache_time=3, switch_pm_text='راهنما ❓', switch_pm_parameter=INLINE_HELP)
 
 
 def main() -> None:
