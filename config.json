@@ -1,5 +1,5 @@
 {
     "apiToken": "<PLACE YOUR API TOKEN HERE>",
-    "poemsDirectory": "divan/",
+    "poemsDirectory": "divan",
     "poemsCount": 495
 }

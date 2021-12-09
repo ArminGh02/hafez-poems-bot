@@ -1,5 +1,5 @@
 from config import POEMS_COUNT
-from file_util import get_poem
+from main import poems
 
 from typing import (
     Callable,
@@ -14,8 +14,8 @@ class Searcher:
             index_of_matched_line: Union[Callable[[list[str], str], int], Callable[[list[str], list[str]], int]],
     ) -> list[str]:
         results = []
-        for i in range(1, POEMS_COUNT + 1):
-            lines = get_poem(i).splitlines()
+        for poem in poems:
+            lines = poem.splitlines()
             j = index_of_matched_line(lines, to_search)
             if j > -1:
                 result = lines[j - 1] + '\n' + lines[j] + '\n' + lines[j + 1]
@@ -29,8 +29,7 @@ class Searcher:
             index_of_matched_line: Union[Callable[[list[str], str], int], Callable[[list[str], list[str]], int]],
     ) -> list[tuple[int, str]]:
         results = []
-        for i in range(1, POEMS_COUNT + 1):
-            poem = get_poem(i)
+        for i, poem in enumerate(poems):
             lines = poem.splitlines()
             j = index_of_matched_line(lines, to_search)
             if j > -1:

@@ -41,10 +41,16 @@ FAVORITE_POEMS_QUERY = '#favorite_poems'
 SURROUNDED_WITH_DOUBLE_QUOTES = r'^"[\u0600-\u06FF\s]+"$'
 NO_MATCH_WAS_FOUND = 'جستجو نتیجه ای در بر نداشت❗️'
 
+poems: list[str] = []
 searcher = Searcher()
 user_to_favorite_poems: dict[User, set[str]] = {}
 user_to_reply_with_line: dict[User, bool] = {}
 to_invoke: Callable[[], None]
+
+
+def init() -> None:
+    for i in range(1, POEMS_COUNT + 1):
+        poems.append(get_poem(i))
 
 
 def start(update: Update, context: CallbackContext) -> None:
@@ -111,8 +117,8 @@ def get_poem_keyboard(poem_number: int, poem: str, user: User) -> InlineKeyboard
 
 
 def get_random_poem() -> tuple[int, str]:
-    rand = randrange(1, POEMS_COUNT)
-    return rand, get_poem(rand)
+    rand = randrange(0, POEMS_COUNT - 1)
+    return rand, poems[rand]
 
 
 def list_favorite_poems(update: Update, _: CallbackContext) -> None:
@@ -202,13 +208,12 @@ def add_to_favorite_poems(update: Update, _: CallbackContext) -> None:
     query = update.callback_query
 
     poem_number = int(query.data.removeprefix('add'))
-    poem = get_poem(poem_number)
     if user not in user_to_favorite_poems:
-        user_to_favorite_poems[user] = {(poem_number, poem)}
+        user_to_favorite_poems[user] = {(poem_number, poems[poem_number])}
     else:
-        user_to_favorite_poems[user].add((poem_number, poem))
+        user_to_favorite_poems[user].add((poem_number, poems[poem_number]))
 
-    query.edit_message_reply_markup(get_poem_keyboard(poem_number, poem, user))
+    query.edit_message_reply_markup(get_poem_keyboard(poem_number, poems[poem_number], user))
     query.answer('این غزل به لیست علاقه‌مندی‌های شما افزوده شد.')
 
 
@@ -217,10 +222,9 @@ def remove_from_favorite_poems(update: Update, _: CallbackContext) -> None:
     query = update.callback_query
 
     poem_number = int(query.data.removeprefix('remove'))
-    poem = get_poem(poem_number)
-    user_to_favorite_poems[user].remove((poem_number, poem))
+    user_to_favorite_poems[user].remove((poem_number, poems[poem_number]))
 
-    query.edit_message_reply_markup(get_poem_keyboard(poem_number, poem, user))
+    query.edit_message_reply_markup(get_poem_keyboard(poem_number, poems[poem_number], user))
     query.answer('این غزل از لیست علاقه‌مندی‌های شما حذف شد.')
 
 
@@ -298,6 +302,8 @@ def handle_inline_query(update: Update, _: CallbackContext) -> None:
 
 
 def main() -> None:
+    init()
+
     updater = Updater(API_TOKEN)
     dispatcher = updater.dispatcher
 
