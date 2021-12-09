@@ -1,7 +1,15 @@
-from poems import poems
 from config import (
     API_TOKEN,
     POEMS_COUNT,
+)
+from poems import (
+    poems,
+    poems_info,
+)
+from search import (
+    Searcher,
+    index_of_matched_line_string,
+    index_of_matched_line_words,
 )
 
 from random import randrange
@@ -40,13 +48,6 @@ searcher = Searcher()
 user_to_favorite_poems: dict[User, set[str]] = {}
 user_to_reply_with_line: dict[User, bool] = {}
 to_invoke: Callable[[], None]
-
-
-from search import (
-    Searcher,
-    index_of_matched_line_string,
-    index_of_matched_line_words,
-)
 
 
 def start(update: Update, context: CallbackContext) -> None:
@@ -147,7 +148,11 @@ def search_impl(update: Update, to_search: Union[str, list[str]]) -> None:
                 update.message.reply_text(poem)
         else:
             for poem_number, poem in results:
-                update.message.reply_text(poem, reply_markup=get_poem_keyboard(poem_number, poem, user))
+                meter = 'وزن: ' + poems_info[poem_number]['meter']
+                update.message.reply_text(
+                    text=meter + '\n\n' + poem,
+                    reply_markup=get_poem_keyboard(poem_number, poem, user)
+                )
 
     if user not in user_to_reply_with_line:
         choose_result_mode(update)
