@@ -1,5 +1,4 @@
-from config import POEMS_COUNT
-from main import poems
+from poems import poems
 
 from typing import (
     Callable,

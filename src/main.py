@@ -1,12 +1,7 @@
-from file_util import get_poem
+from poems import poems
 from config import (
     API_TOKEN,
     POEMS_COUNT,
-)
-from search import (
-    Searcher,
-    index_of_matched_line_string,
-    index_of_matched_line_words,
 )
 
 from random import randrange
@@ -41,16 +36,17 @@ FAVORITE_POEMS_QUERY = '#favorite_poems'
 SURROUNDED_WITH_DOUBLE_QUOTES = r'^"[\u0600-\u06FF\s]+"$'
 NO_MATCH_WAS_FOUND = 'جستجو نتیجه ای در بر نداشت❗️'
 
-poems: list[str] = []
 searcher = Searcher()
 user_to_favorite_poems: dict[User, set[str]] = {}
 user_to_reply_with_line: dict[User, bool] = {}
 to_invoke: Callable[[], None]
 
 
-def init() -> None:
-    for i in range(1, POEMS_COUNT + 1):
-        poems.append(get_poem(i))
+from search import (
+    Searcher,
+    index_of_matched_line_string,
+    index_of_matched_line_words,
+)
 
 
 def start(update: Update, context: CallbackContext) -> None:
@@ -302,8 +298,6 @@ def handle_inline_query(update: Update, _: CallbackContext) -> None:
 
 
 def main() -> None:
-    init()
-
     updater = Updater(API_TOKEN)
     dispatcher = updater.dispatcher
 
