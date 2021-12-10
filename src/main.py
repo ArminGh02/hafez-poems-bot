@@ -243,7 +243,7 @@ def send_audio_of_poem(update: Update, context: CallbackContext) -> None:
     poem_number = int(query.data.removeprefix('audio'))
 
     context.bot.forward_message(
-        chat_id=update.message.chat.id,
+        chat_id=update.effective_chat.id,
         from_chat_id=DATABASE_CHANNEL_USERNAME,
         message_id=poem_number + 2   # channel message ID's start from 2
     )
