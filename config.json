@@ -1,5 +1,5 @@
 {
     "apiToken": "<PLACE YOUR API TOKEN HERE>",
-    "poemsDirectory": "divan",
-    "poemsCount": 495
+    "poemsCount": 495,
+    "databaseChannelUsername": "@audio_database"
 }
