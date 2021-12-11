@@ -16,6 +16,7 @@ from search import (
 from random import randrange
 from re import match
 from typing import (
+    Any,
     Callable,
     Union,
 )
@@ -104,20 +105,22 @@ def random_poem_command(update: Update, _: CallbackContext) -> None:
 
 
 def get_poem_keyboard(poem_number: int, poem: str, user: User) -> InlineKeyboardMarkup:
-    keyboard: list[list[InlineKeyboardButton]]
-    audio_button = InlineKeyboardButton('خوانش 🎵', callback_data=f'audio{poem_number}')
+    audio_button = InlineKeyboardButton('خوانش 🗣', callback_data=f'audio{poem_number}')
+    related_songs_button = InlineKeyboardButton(
+        text='این شعر را چه کسی در کدام آهنگ خوانده است؟ 🎵',
+        callback_data=f'songs{poem_number}'
+    )
+
+    keyboard = [[audio_button], [related_songs_button]]
+
     if user in _user_to_favorite_poems and (poem_number, poem) in _user_to_favorite_poems[user]:
-        callback_data = f'remove{poem_number}'
-        keyboard = [
-            [InlineKeyboardButton('حذف از غزل‌های مورد علاقه', callback_data=callback_data)],
-            [audio_button],
-        ]
+        keyboard.append(
+            [InlineKeyboardButton('حذف از غزل‌های مورد علاقه', callback_data=f'remove{poem_number}')]
+        )
     else:
-        callback_data = f'add{poem_number}'
-        keyboard = [
-            [InlineKeyboardButton('افزودن به غزل های مورد علاقه ❤️', callback_data=callback_data)],
-            [audio_button],
-        ]
+        keyboard.append(
+            [InlineKeyboardButton('افزودن به غزل های مورد علاقه ❤️', callback_data=f'add{poem_number}')]
+        )
 
     return InlineKeyboardMarkup(keyboard)
 
@@ -251,6 +254,32 @@ def send_audio_of_poem(update: Update, context: CallbackContext) -> None:
     query.answer()
 
 
+def display_related_songs_to_poem(update: Update, _: CallbackContext) -> None:
+    query = update.callback_query
+    poem_number = int(query.data.removeprefix('songs'))
+
+    related_songs: list[dict[str, str]] = poems_info[poem_number]['relatedSongs']
+
+    keyboard = list(
+        map(
+            lambda song: [InlineKeyboardButton(song['title'], url=song['link'])],
+            related_songs
+        )
+    )
+    keyboard.append([InlineKeyboardButton('بازگشت 🔙', callback_data=f'back{poem_number}')])
+
+    query.edit_message_reply_markup(InlineKeyboardMarkup(keyboard))
+    query.answer()
+
+
+def return_to_menu_of_poem(update: Update, _:CallbackContext) -> None:
+    query = update.callback_query
+    poem_number = int(query.data.removeprefix('back'))
+
+    query.edit_message_reply_markup(get_poem_keyboard(poem_number, poems[poem_number], update.effective_user))
+    query.answer()
+
+
 def handle_favorite_poems_inline_query(update: Update, _: CallbackContext) -> None:
     user = update.effective_user
     if not _user_to_favorite_poems.get(user):
@@ -348,6 +377,8 @@ def main() -> None:
     dispatcher.add_handler(CallbackQueryHandler(add_to_favorite_poems, pattern=r'^add\d{1,3}$'))
     dispatcher.add_handler(CallbackQueryHandler(remove_from_favorite_poems, pattern=r'^remove\d{1,3}$'))
     dispatcher.add_handler(CallbackQueryHandler(send_audio_of_poem, pattern=r'^audio\d{1,3}$'))
+    dispatcher.add_handler(CallbackQueryHandler(display_related_songs_to_poem, pattern=r'^songs\d{1,3}$'))
+    dispatcher.add_handler(CallbackQueryHandler(return_to_menu_of_poem, pattern=r'^back\d{1,3}$'))
 
     dispatcher.add_handler(InlineQueryHandler(handle_favorite_poems_inline_query, pattern=_FAVORITE_POEMS_QUERY))
     dispatcher.add_handler(InlineQueryHandler(handle_inline_query))
