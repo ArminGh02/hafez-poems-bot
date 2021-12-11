@@ -51,6 +51,10 @@ _user_to_reply_with_line: dict[User, bool] = {}
 _to_invoke: Callable[[], None]
 
 
+########################################################################################################################
+# CommandHandler callbacks:
+########################################################################################################################
+
 def start(update: Update, context: CallbackContext) -> None:
     args = context.args
     if args:
@@ -103,32 +107,6 @@ def random_poem_command(update: Update, _: CallbackContext) -> None:
     update.message.reply_text(poem + meter, reply_markup=get_poem_keyboard(poem_number, poem, update.effective_user))
 
 
-def get_poem_keyboard(poem_number: int, poem: str, user: User) -> InlineKeyboardMarkup:
-    audio_button = InlineKeyboardButton('خوانش 🗣', callback_data=f'audio{poem_number}')
-    related_songs_button = InlineKeyboardButton(
-        text='این شعر را چه کسی در کدام آهنگ خوانده است؟ 🎵',
-        callback_data=f'songs{poem_number}'
-    )
-
-    keyboard = [[audio_button], [related_songs_button]]
-
-    if user in _user_to_favorite_poems and (poem_number, poem) in _user_to_favorite_poems[user]:
-        keyboard.append(
-            [InlineKeyboardButton('حذف از غزل‌های مورد علاقه', callback_data=f'remove{poem_number}')]
-        )
-    else:
-        keyboard.append(
-            [InlineKeyboardButton('افزودن به غزل های مورد علاقه ❤️', callback_data=f'add{poem_number}')]
-        )
-
-    return InlineKeyboardMarkup(keyboard)
-
-
-def get_random_poem() -> tuple[int, str]:
-    rand = randrange(0, POEMS_COUNT - 1)
-    return rand, poems[rand]
-
-
 def list_favorite_poems(update: Update, _: CallbackContext) -> None:
     keyboard = [
         [InlineKeyboardButton('لیست غزل های مورد علاقه ❤️', switch_inline_query_current_chat=_FAVORITE_POEMS_QUERY)],
@@ -136,6 +114,10 @@ def list_favorite_poems(update: Update, _: CallbackContext) -> None:
     reply_markup = InlineKeyboardMarkup(keyboard)
     update.message.reply_text('دکمه زیر را بزن.', reply_markup=reply_markup)
 
+
+########################################################################################################################
+# MessageHandler callbacks:
+########################################################################################################################
 
 def search_words(update: Update, _: CallbackContext) -> None:
     words = update.message.text.split()
@@ -147,47 +129,9 @@ def search_string(update: Update, _: CallbackContext) -> None:
     search_impl(update, string_to_search)
 
 
-def search_impl(update: Update, to_search: Union[str, list[str]]) -> None:
-    user = update.effective_user
-
-    def send_results() -> None:
-        results = find_results(update, to_search)
-        if not results:
-            update.message.reply_text(_NO_MATCH_WAS_FOUND)
-        elif _user_to_reply_with_line[user]:
-            for poem in results:
-                update.message.reply_text(poem)
-        else:
-            for poem_number, poem in results:
-                meter = '🎼وزن: ' + poems_info[poem_number]['meter']
-                update.message.reply_text(
-                    text=poem + meter,
-                    reply_markup=get_poem_keyboard(poem_number, poem, user)
-                )
-
-    if user not in _user_to_reply_with_line:
-        choose_result_mode(update)
-        global _to_invoke
-        _to_invoke = send_results
-    else:
-        send_results()
-
-
-def find_results(update: Update, to_search: Union[str, list[str]]) -> Union[list[str], list[tuple[str]]]:
-    user = update.effective_user
-
-    if user not in _user_to_reply_with_line:
-        _user_to_reply_with_line[user] = True
-
-    results: Union[list[str], list[tuple[int, str]]]
-    index_of_matched_line = index_of_matched_line_string if isinstance(to_search, str) else index_of_matched_line_words
-    if _user_to_reply_with_line[user]:
-        results = _searcher.search_return_lines(to_search, index_of_matched_line)
-    else:
-        results = _searcher.search_return_poems(to_search, index_of_matched_line)
-
-    return results
-
+########################################################################################################################
+# CallbackQueryHandler callbacks
+########################################################################################################################
 
 def choose_result_mode(update: Update) -> None:
     keyboard = [
@@ -279,6 +223,10 @@ def return_to_menu_of_poem(update: Update, _:CallbackContext) -> None:
     query.answer()
 
 
+########################################################################################################################
+# InlineQueryHandler callbacks:
+########################################################################################################################
+
 def handle_favorite_poems_inline_query(update: Update, _: CallbackContext) -> None:
     user = update.effective_user
     if not _user_to_favorite_poems.get(user):
@@ -351,6 +299,78 @@ def handle_inline_query(update: Update, _: CallbackContext) -> None:
             )
 
     update.inline_query.answer(results, cache_time=3, switch_pm_text='راهنما ❓', switch_pm_parameter=_INLINE_HELP)
+
+
+########################################################################################################################
+# Helper functions:
+########################################################################################################################
+
+def get_poem_keyboard(poem_number: int, poem: str, user: User) -> InlineKeyboardMarkup:
+    audio_button = InlineKeyboardButton('خوانش 🗣', callback_data=f'audio{poem_number}')
+    related_songs_button = InlineKeyboardButton(
+        text='این شعر را چه کسی در کدام آهنگ خوانده است؟ 🎵',
+        callback_data=f'songs{poem_number}'
+    )
+
+    keyboard = [[audio_button], [related_songs_button]]
+
+    if user in _user_to_favorite_poems and (poem_number, poem) in _user_to_favorite_poems[user]:
+        keyboard.append(
+            [InlineKeyboardButton('حذف از غزل‌های مورد علاقه', callback_data=f'remove{poem_number}')]
+        )
+    else:
+        keyboard.append(
+            [InlineKeyboardButton('افزودن به غزل های مورد علاقه ❤️', callback_data=f'add{poem_number}')]
+        )
+
+    return InlineKeyboardMarkup(keyboard)
+
+
+def get_random_poem() -> tuple[int, str]:
+    rand = randrange(0, POEMS_COUNT - 1)
+    return rand, poems[rand]
+
+
+def search_impl(update: Update, to_search: Union[str, list[str]]) -> None:
+    user = update.effective_user
+
+    def send_results() -> None:
+        results = find_results(update, to_search)
+        if not results:
+            update.message.reply_text(_NO_MATCH_WAS_FOUND)
+        elif _user_to_reply_with_line[user]:
+            for poem in results:
+                update.message.reply_text(poem)
+        else:
+            for poem_number, poem in results:
+                meter = '🎼وزن: ' + poems_info[poem_number]['meter']
+                update.message.reply_text(
+                    text=poem + meter,
+                    reply_markup=get_poem_keyboard(poem_number, poem, user)
+                )
+
+    if user not in _user_to_reply_with_line:
+        choose_result_mode(update)
+        global _to_invoke
+        _to_invoke = send_results
+    else:
+        send_results()
+
+
+def find_results(update: Update, to_search: Union[str, list[str]]) -> Union[list[str], list[tuple[str]]]:
+    user = update.effective_user
+
+    if user not in _user_to_reply_with_line:
+        _user_to_reply_with_line[user] = True
+
+    results: Union[list[str], list[tuple[int, str]]]
+    index_of_matched_line = index_of_matched_line_string if isinstance(to_search, str) else index_of_matched_line_words
+    if _user_to_reply_with_line[user]:
+        results = _searcher.search_return_lines(to_search, index_of_matched_line)
+    else:
+        results = _searcher.search_return_poems(to_search, index_of_matched_line)
+
+    return results
 
 
 def main() -> None:
