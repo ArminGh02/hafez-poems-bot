@@ -16,7 +16,6 @@ from search import (
 from random import randrange
 from re import match
 from typing import (
-    Any,
     Callable,
     Union,
 )
