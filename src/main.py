@@ -51,9 +51,9 @@ _user_to_reply_with_line: dict[User, bool] = {}
 _to_invoke: Callable[[], None]
 
 
-########################################################################################################################
-# CommandHandler callbacks:
-########################################################################################################################
+############################
+# CommandHandler callbacks #
+############################
 
 def start(update: Update, context: CallbackContext) -> None:
     args = context.args
@@ -115,9 +115,9 @@ def list_favorite_poems(update: Update, _: CallbackContext) -> None:
     update.message.reply_text('دکمه زیر را بزن.', reply_markup=reply_markup)
 
 
-########################################################################################################################
-# MessageHandler callbacks:
-########################################################################################################################
+############################
+# MessageHandler callbacks #
+############################
 
 def search_words(update: Update, _: CallbackContext) -> None:
     words = update.message.text.split()
@@ -129,9 +129,9 @@ def search_string(update: Update, _: CallbackContext) -> None:
     search_impl(update, string_to_search)
 
 
-########################################################################################################################
-# CallbackQueryHandler callbacks
-########################################################################################################################
+##################################
+# CallbackQueryHandler callbacks #
+##################################
 
 def choose_result_mode(update: Update) -> None:
     keyboard = [
@@ -146,7 +146,6 @@ def result_mode_chosen(update: Update, _: CallbackContext) -> None:
     query = update.callback_query
     user = update.effective_user
 
-    text: str
     if query.data == 'line':
         text = 'در نتیجه جستجو بیت دریافت می شود.'
         _user_to_reply_with_line[user] = True
@@ -223,9 +222,9 @@ def return_to_menu_of_poem(update: Update, _:CallbackContext) -> None:
     query.answer()
 
 
-########################################################################################################################
-# InlineQueryHandler callbacks:
-########################################################################################################################
+################################
+# InlineQueryHandler callbacks #
+################################
 
 def handle_favorite_poems_inline_query(update: Update, _: CallbackContext) -> None:
     user = update.effective_user
@@ -301,9 +300,9 @@ def handle_inline_query(update: Update, _: CallbackContext) -> None:
     update.inline_query.answer(results, cache_time=3, switch_pm_text='راهنما ❓', switch_pm_parameter=_INLINE_HELP)
 
 
-########################################################################################################################
-# Helper functions:
-########################################################################################################################
+####################
+# Helper functions #
+####################
 
 def get_poem_keyboard(poem_number: int, poem: str, user: User) -> InlineKeyboardMarkup:
     audio_button = InlineKeyboardButton('خوانش 🗣', callback_data=f'audio{poem_number}')
@@ -363,7 +362,6 @@ def find_results(update: Update, to_search: Union[str, list[str]]) -> Union[list
     if user not in _user_to_reply_with_line:
         _user_to_reply_with_line[user] = True
 
-    results: Union[list[str], list[tuple[int, str]]]
     index_of_matched_line = index_of_matched_line_string if isinstance(to_search, str) else index_of_matched_line_words
     if _user_to_reply_with_line[user]:
         results = _searcher.search_return_lines(to_search, index_of_matched_line)
