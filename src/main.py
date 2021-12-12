@@ -13,6 +13,7 @@ from search import (
     index_of_matched_line_words,
 )
 
+from itertools import starmap
 from random import randrange
 from re import match
 from typing import (
@@ -202,13 +203,13 @@ def display_related_songs_to_poem(update: Update, _: CallbackContext) -> None:
 
     related_songs: list[dict[str, str]] = poems_info[poem_number]['relatedSongs']
 
-    keyboard = list(
-        map(
+    keyboard = [
+        *map(
             lambda song: [InlineKeyboardButton(song['title'], url=song['link'])],
             related_songs
-        )
-    )
-    keyboard.append([InlineKeyboardButton('بازگشت 🔙', callback_data=f'back{poem_number}')])
+        ),
+        [InlineKeyboardButton('بازگشت 🔙', callback_data=f'back{poem_number}')]
+    ]
 
     query.edit_message_reply_markup(InlineKeyboardMarkup(keyboard))
     query.answer()
@@ -228,7 +229,9 @@ def return_to_menu_of_poem(update: Update, _:CallbackContext) -> None:
 
 def handle_favorite_poems_inline_query(update: Update, _: CallbackContext) -> None:
     user = update.effective_user
-    if not _user_to_favorite_poems.get(user):
+    favorite_poems = _user_to_favorite_poems.get(user)
+
+    if not favorite_poems:
         update.inline_query.answer(
             results=[],
             switch_pm_text='لیست علاقه‌مندی‌های شما خالی است ❗️',
@@ -236,17 +239,17 @@ def handle_favorite_poems_inline_query(update: Update, _: CallbackContext) -> No
         )
         return
 
-    favorite_poems = _user_to_favorite_poems[user]
-    results = []
-    for poem_number, poem in favorite_poems:
-        results.append(
-            InlineQueryResultArticle(
+    results = list(
+        starmap(
+            lambda poem_number, poem: InlineQueryResultArticle(
                 id=str(uuid4()),
                 title=poem[:60] + '...',
                 input_message_content=InputTextMessageContent(poem),
                 reply_markup=get_poem_keyboard(poem_number, poem, user),
-            )
+            ),
+            favorite_poems
         )
+    )
 
     update.inline_query.answer(results, cache_time=3)
 
@@ -263,39 +266,48 @@ def handle_inline_query(update: Update, _: CallbackContext) -> None:
         search_results = find_results(update, query.split())
 
     poem_number, poem = get_random_poem()
-    results = [
-        InlineQueryResultArticle(
-            id=str(uuid4()),
-            title='فال',
-            input_message_content=InputTextMessageContent(poem),
-            reply_markup=get_poem_keyboard(poem_number, poem, user),
-        ),
-    ]
+    random_poem = InlineQueryResultArticle(
+        id=str(uuid4()),
+        title='فال',
+        input_message_content=InputTextMessageContent(poem),
+        reply_markup=get_poem_keyboard(poem_number, poem, user),
+    )
 
     if not search_results:
-        update.inline_query.answer(results, switch_pm_text=_NO_MATCH_WAS_FOUND, switch_pm_parameter=_INLINE_HELP)
+        update.inline_query.answer(
+            results=[random_poem],
+            switch_pm_text=_NO_MATCH_WAS_FOUND,
+            switch_pm_parameter=_INLINE_HELP
+        )
         return
 
     if user in _user_to_reply_with_line and _user_to_reply_with_line[user]:
-        for search_result in search_results:
-            results.append(
-                InlineQueryResultArticle(
+        results = [
+            random_poem,
+            *map(
+                lambda search_result: InlineQueryResultArticle(
                     id=str(uuid4()),
                     title=search_result[:60] + '...',
                     input_message_content=InputTextMessageContent(search_result),
-                )
-            )
+                ),
+                search_results
+            ),
+        ]
     else:
-        for poem_number, poem in search_results:
-            meter = '🎼وزن: ' + poems_info[poem_number]['meter']
-            results.append(
-                InlineQueryResultArticle(
+        results= [
+            random_poem,
+            *starmap(
+                lambda poem_number, poem: InlineQueryResultArticle(
                     id=str(uuid4()),
                     title=poem[:60] + '...',
-                    input_message_content=InputTextMessageContent(poem + meter),
+                    input_message_content=InputTextMessageContent(
+                        poem + '🎼وزن: ' + poems_info[poem_number]['meter']
+                    ),
                     reply_markup=get_poem_keyboard(poem_number, poem, user),
-                )
-            )
+                ),
+                search_results
+            ),
+        ]
 
     update.inline_query.answer(results, cache_time=3, switch_pm_text='راهنما ❓', switch_pm_parameter=_INLINE_HELP)
 
@@ -357,13 +369,8 @@ def search_impl(update: Update, to_search: Union[str, list[str]]) -> None:
 
 
 def find_results(update: Update, to_search: Union[str, list[str]]) -> Union[list[str], list[tuple[str]]]:
-    user = update.effective_user
-
-    if user not in _user_to_reply_with_line:
-        _user_to_reply_with_line[user] = True
-
     index_of_matched_line = index_of_matched_line_string if isinstance(to_search, str) else index_of_matched_line_words
-    if _user_to_reply_with_line[user]:
+    if _user_to_reply_with_line.get(update.effective_user, True):
         results = _searcher.search_return_lines(to_search, index_of_matched_line)
     else:
         results = _searcher.search_return_poems(to_search, index_of_matched_line)
@@ -385,8 +392,8 @@ def main() -> None:
     dispatcher.add_handler(MessageHandler(Filters.regex(_SURROUNDED_WITH_DOUBLE_QUOTES), search_string))
     dispatcher.add_handler(
         MessageHandler(
-            Filters.text & ~Filters.command & ~Filters.via_bot(username='hafez_poems_bot'),
-            search_words
+            Filters.text & ~Filters.command & ~Filters.via_bot(username=dispatcher.bot.username),
+            search_words,
         )
     )
 
