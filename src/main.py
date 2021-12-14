@@ -41,7 +41,9 @@ from telegram.ext import (
 )
 
 
+_BOT_USERNAME: str
 _INLINE_HELP = 'inline-help'
+_SEND_AUDIO = 'audio'
 _FAVORITE_POEMS_QUERY = '#favorite_poems'
 _SURROUNDED_WITH_DOUBLE_QUOTES = r'^"[\u0600-\u06FF\s]+"$'
 _NO_MATCH_WAS_FOUND = 'جستجو نتیجه ای در بر نداشت❗️'
@@ -66,6 +68,13 @@ def start(update: Update, context: CallbackContext) -> None:
                 'یک بیتش شامل کلمات وارد شده، باشد دریافت خواهی کرد.\n'
                 'در ضمن اگر می خواهی کل یک عبارت با هم (و نه تک تک کلماتش)\n'
                 'در بیت جستجو شود، آن را درون "" بگذار.'
+            )
+        elif args[0].startswith(_SEND_AUDIO):
+            poem_number = int(args[0].removeprefix(_SEND_AUDIO))
+            context.bot.forward_message(
+                chat_id=update.effective_chat.id,
+                from_chat_id=DATABASE_CHANNEL_USERNAME,
+                message_id=poem_number + 2   # channel message ID's start from 2
             )
     else:
         help_command(update, context)
@@ -105,7 +114,10 @@ def reply_poem(update: Update, _: CallbackContext) -> None:
 def random_poem_command(update: Update, _: CallbackContext) -> None:
     poem_number, poem = get_random_poem()
     meter = '🎼وزن: ' + poems_info[poem_number]['meter']
-    update.message.reply_text(poem + meter, reply_markup=get_poem_keyboard(poem_number, poem, update.effective_user))
+    update.message.reply_text(
+        text=poem + meter,
+        reply_markup=get_poem_keyboard(poem_number, poem, update.effective_user, False),
+    )
 
 
 def list_favorite_poems(update: Update, _: CallbackContext) -> None:
@@ -134,15 +146,6 @@ def search_string(update: Update, _: CallbackContext) -> None:
 # CallbackQueryHandler callbacks #
 ##################################
 
-def choose_result_mode(update: Update) -> None:
-    keyboard = [
-        [InlineKeyboardButton('در نتیجه جستجو، کل غزل دریافت شود.', callback_data='poem')],
-        [InlineKeyboardButton('در نتیجه جستجو، فقط بیت دریافت شود.', callback_data='line')],
-    ]
-    reply_markup = InlineKeyboardMarkup(keyboard)
-    update.message.reply_text('لطفا انتخاب کن:', reply_markup=reply_markup)
-
-
 def result_mode_chosen(update: Update, _: CallbackContext) -> None:
     query = update.callback_query
     user = update.effective_user
@@ -164,12 +167,13 @@ def add_to_favorite_poems(update: Update, _: CallbackContext) -> None:
     query = update.callback_query
 
     poem_number = int(query.data.removeprefix('add'))
+    poem = poems[poem_number]
     if user not in _user_to_favorite_poems:
-        _user_to_favorite_poems[user] = {(poem_number, poems[poem_number])}
+        _user_to_favorite_poems[user] = {(poem_number, poem)}
     else:
-        _user_to_favorite_poems[user].add((poem_number, poems[poem_number]))
+        _user_to_favorite_poems[user].add((poem_number, poem))
 
-    query.edit_message_reply_markup(get_poem_keyboard(poem_number, poems[poem_number], user))
+    query.edit_message_reply_markup(get_poem_keyboard(poem_number, poem, user, update.effective_chat == None))
     query.answer('این غزل به لیست علاقه‌مندی‌های شما افزوده شد.')
 
 
@@ -178,9 +182,10 @@ def remove_from_favorite_poems(update: Update, _: CallbackContext) -> None:
     query = update.callback_query
 
     poem_number = int(query.data.removeprefix('remove'))
-    _user_to_favorite_poems[user].remove((poem_number, poems[poem_number]))
+    poem = poems[poem_number]
+    _user_to_favorite_poems[user].remove((poem_number, poem))
 
-    query.edit_message_reply_markup(get_poem_keyboard(poem_number, poems[poem_number], user))
+    query.edit_message_reply_markup(get_poem_keyboard(poem_number, poem, user, update.effective_chat == None))
     query.answer('این غزل از لیست علاقه‌مندی‌های شما حذف شد.')
 
 
@@ -218,8 +223,10 @@ def display_related_songs_to_poem(update: Update, _: CallbackContext) -> None:
 def return_to_menu_of_poem(update: Update, _:CallbackContext) -> None:
     query = update.callback_query
     poem_number = int(query.data.removeprefix('back'))
+    user = update.effective_user
 
-    query.edit_message_reply_markup(get_poem_keyboard(poem_number, poems[poem_number], update.effective_user))
+    keyboard = get_poem_keyboard(poem_number, poems[poem_number], user, update.effective_chat == None)
+    query.edit_message_reply_markup(keyboard)
     query.answer()
 
 
@@ -243,9 +250,9 @@ def handle_favorite_poems_inline_query(update: Update, _: CallbackContext) -> No
         starmap(
             lambda poem_number, poem: InlineQueryResultArticle(
                 id=str(uuid4()),
-                title=poem[:60] + '...',
+                title=poem,
                 input_message_content=InputTextMessageContent(poem),
-                reply_markup=get_poem_keyboard(poem_number, poem, user),
+                reply_markup=get_poem_keyboard(poem_number, poem, user, True),
             ),
             favorite_poems
         )
@@ -270,7 +277,7 @@ def handle_inline_query(update: Update, _: CallbackContext) -> None:
         id=str(uuid4()),
         title='فال',
         input_message_content=InputTextMessageContent(poem),
-        reply_markup=get_poem_keyboard(poem_number, poem, user),
+        reply_markup=get_poem_keyboard(poem_number, poem, user, True),
     )
 
     if not search_results:
@@ -281,29 +288,29 @@ def handle_inline_query(update: Update, _: CallbackContext) -> None:
         )
         return
 
-    if user in _user_to_reply_with_line and _user_to_reply_with_line[user]:
+    if _user_to_reply_with_line.get(user, True):
         results = [
             random_poem,
             *map(
                 lambda search_result: InlineQueryResultArticle(
                     id=str(uuid4()),
-                    title=search_result[:60] + '...',
+                    title=search_result,
                     input_message_content=InputTextMessageContent(search_result),
                 ),
                 search_results
             ),
         ]
     else:
-        results= [
+        results = [
             random_poem,
             *starmap(
                 lambda poem_number, poem: InlineQueryResultArticle(
                     id=str(uuid4()),
-                    title=poem[:60] + '...',
+                    title=poem,
                     input_message_content=InputTextMessageContent(
                         poem + '🎼وزن: ' + poems_info[poem_number]['meter']
                     ),
-                    reply_markup=get_poem_keyboard(poem_number, poem, user),
+                    reply_markup=get_poem_keyboard(poem_number, poem, user, True),
                 ),
                 search_results
             ),
@@ -316,14 +323,23 @@ def handle_inline_query(update: Update, _: CallbackContext) -> None:
 # Helper functions #
 ####################
 
-def get_poem_keyboard(poem_number: int, poem: str, user: User) -> InlineKeyboardMarkup:
-    audio_button = InlineKeyboardButton('خوانش 🗣', callback_data=f'audio{poem_number}')
-    related_songs_button = InlineKeyboardButton(
-        text='این شعر را چه کسی در کدام آهنگ خوانده است؟ 🎵',
-        callback_data=f'songs{poem_number}'
-    )
+def get_poem_keyboard(poem_number: int, poem: str, user: User, inline: bool) -> InlineKeyboardMarkup:
+    if inline:
+        audio_button = InlineKeyboardButton(
+            text='خوانش 🗣',
+            url=f'https://telegram.me/{_BOT_USERNAME}?start={_SEND_AUDIO}{poem_number}'
+        )
+    else:
+        audio_button = InlineKeyboardButton('خوانش 🗣', callback_data=f'audio{poem_number}')
 
-    keyboard = [[audio_button], [related_songs_button]]
+    keyboard = [[audio_button]]
+
+    if poems_info[poem_number]['relatedSongs']:
+        related_songs_button = InlineKeyboardButton(
+            text='این شعر را چه کسی در کدام آهنگ خوانده است؟ 🎵',
+            callback_data=f'songs{poem_number}'
+        )
+        keyboard.append([related_songs_button])
 
     if user in _user_to_favorite_poems and (poem_number, poem) in _user_to_favorite_poems[user]:
         keyboard.append(
@@ -357,7 +373,7 @@ def search_impl(update: Update, to_search: Union[str, list[str]]) -> None:
                 meter = '🎼وزن: ' + poems_info[poem_number]['meter']
                 update.message.reply_text(
                     text=poem + meter,
-                    reply_markup=get_poem_keyboard(poem_number, poem, user)
+                    reply_markup=get_poem_keyboard(poem_number, poem, user, False)
                 )
 
     if user not in _user_to_reply_with_line:
@@ -378,9 +394,21 @@ def find_results(update: Update, to_search: Union[str, list[str]]) -> Union[list
     return results
 
 
+def choose_result_mode(update: Update) -> None:
+    keyboard = [
+        [InlineKeyboardButton('در نتیجه جستجو، کل غزل دریافت شود.', callback_data='poem')],
+        [InlineKeyboardButton('در نتیجه جستجو، فقط بیت دریافت شود.', callback_data='line')],
+    ]
+    reply_markup = InlineKeyboardMarkup(keyboard)
+    update.message.reply_text('لطفا انتخاب کن:', reply_markup=reply_markup)
+
+
 def main() -> None:
     updater = Updater(API_TOKEN)
     dispatcher = updater.dispatcher
+
+    global _BOT_USERNAME
+    _BOT_USERNAME = dispatcher.bot.username
 
     dispatcher.add_handler(CommandHandler('start', start))
     dispatcher.add_handler(CommandHandler('help', help_command))
@@ -392,7 +420,7 @@ def main() -> None:
     dispatcher.add_handler(MessageHandler(Filters.regex(_SURROUNDED_WITH_DOUBLE_QUOTES), search_string))
     dispatcher.add_handler(
         MessageHandler(
-            Filters.text & ~Filters.command & ~Filters.via_bot(username=dispatcher.bot.username),
+            Filters.text & ~Filters.command & ~Filters.via_bot(username=_BOT_USERNAME),
             search_words,
         )
     )
