@@ -16,10 +16,7 @@ from search import (
 from itertools import starmap
 from random import randrange
 from re import match
-from typing import (
-    Callable,
-    Union,
-)
+from typing import Union
 from uuid import uuid4
 
 from telegram import (
@@ -29,6 +26,7 @@ from telegram import (
     InputTextMessageContent,
     Update,
     User,
+    Message
 )
 from telegram.ext import (
     CallbackContext,
@@ -51,7 +49,6 @@ _NO_MATCH_WAS_FOUND = 'جستجو نتیجه ای در بر نداشت❗️'
 _searcher = Searcher()
 _user_to_favorite_poems: dict[User, set[str]] = {}
 _user_to_reply_with_line: dict[User, bool] = {}
-_to_invoke: Callable[[], None]
 
 
 ############################
@@ -133,13 +130,21 @@ def list_favorite_poems(update: Update, _: CallbackContext) -> None:
 ############################
 
 def search_words(update: Update, _: CallbackContext) -> None:
-    words = update.message.text.split()
-    search_impl(update, words)
+    query = update.message.text
+    if update.effective_user not in _user_to_reply_with_line:
+        choose_result_mode(update, query)
+        return
+
+    search_impl(update, query.split())
 
 
 def search_string(update: Update, _: CallbackContext) -> None:
-    string_to_search = update.message.text[1:-1]  # remove "" (double quotes) from start and end of string
-    search_impl(update, string_to_search)
+    query = update.message.text
+    if update.effective_user not in _user_to_reply_with_line:
+        choose_result_mode(update, query)
+        return
+
+    search_impl(update, query[1:-1])
 
 
 ##################################
@@ -147,19 +152,26 @@ def search_string(update: Update, _: CallbackContext) -> None:
 ##################################
 
 def result_mode_chosen(update: Update, _: CallbackContext) -> None:
-    query = update.callback_query
     user = update.effective_user
+    query = update.callback_query
+    data = query.data
 
-    if query.data == 'line':
+    if data.startswith('line_'):
         text = 'در نتیجه جستجو بیت دریافت می شود.'
         _user_to_reply_with_line[user] = True
-    else:  # query.data == 'poem'
+        search_query = data.removeprefix('line_')
+    else:  # data == 'poem_<query>'
         text = 'در نتیجه جستجو کل غزل دریافت می شود.'
         _user_to_reply_with_line[user] = False
+        search_query = data.removeprefix('poem_')
 
     query.edit_message_text(text)
     query.answer()
-    _to_invoke()
+
+    if search_query.startswith('"'):
+        search_impl(update, search_query[1:-1])
+    else:
+        search_impl(update, search_query.split())
 
 
 def add_to_favorite_poems(update: Update, _: CallbackContext) -> None:
@@ -358,30 +370,21 @@ def get_random_poem() -> tuple[int, str]:
     return rand, poems[rand]
 
 
-def search_impl(update: Update, to_search: Union[str, list[str]]) -> None:
+def search_impl(update: Update, query: Union[str, list[str]]) -> None:
     user = update.effective_user
-
-    def send_results() -> None:
-        results = find_results(update, to_search)
-        if not results:
-            update.message.reply_text(_NO_MATCH_WAS_FOUND)
-        elif _user_to_reply_with_line[user]:
-            for poem in results:
-                update.message.reply_text(poem)
-        else:
-            for poem_number, poem in results:
-                meter = '🎼وزن: ' + poems_info[poem_number]['meter']
-                update.message.reply_text(
-                    text=poem + meter,
-                    reply_markup=get_poem_keyboard(poem_number, poem, user, False)
-                )
-
-    if user not in _user_to_reply_with_line:
-        choose_result_mode(update)
-        global _to_invoke
-        _to_invoke = send_results
+    results = find_results(update, query)
+    if not results:
+        update.message.reply_text(_NO_MATCH_WAS_FOUND)
+    elif _user_to_reply_with_line[user]:
+        for poem in results:
+            update.effective_chat.send_message(poem)
     else:
-        send_results()
+        for poem_number, poem in results:
+            meter = '🎼وزن: ' + poems_info[poem_number]['meter']
+            update.effective_chat.send_message(
+                text=poem + meter,
+                reply_markup=get_poem_keyboard(poem_number, poem, user, False)
+            )
 
 
 def find_results(update: Update, to_search: Union[str, list[str]]) -> Union[list[str], list[tuple[int, str]]]:
@@ -394,10 +397,10 @@ def find_results(update: Update, to_search: Union[str, list[str]]) -> Union[list
     return results
 
 
-def choose_result_mode(update: Update) -> None:
+def choose_result_mode(update: Update, query: str) -> None:
     keyboard = [
-        [InlineKeyboardButton('در نتیجه جستجو، کل غزل دریافت شود.', callback_data='poem')],
-        [InlineKeyboardButton('در نتیجه جستجو، فقط بیت دریافت شود.', callback_data='line')],
+        [InlineKeyboardButton('در نتیجه جستجو، کل غزل دریافت شود.', callback_data=f'poem_{query}')],
+        [InlineKeyboardButton('در نتیجه جستجو، فقط بیت دریافت شود.', callback_data=f'line_{query}')],
     ]
     reply_markup = InlineKeyboardMarkup(keyboard)
     update.message.reply_text('لطفا انتخاب کن:', reply_markup=reply_markup)
@@ -425,7 +428,7 @@ def main() -> None:
         )
     )
 
-    dispatcher.add_handler(CallbackQueryHandler(result_mode_chosen, pattern=r'^(poem|line)$'))
+    dispatcher.add_handler(CallbackQueryHandler(result_mode_chosen, pattern=r'^(poem_|line_)'))
     dispatcher.add_handler(CallbackQueryHandler(add_to_favorite_poems, pattern=r'^add\d{1,3}$'))
     dispatcher.add_handler(CallbackQueryHandler(remove_from_favorite_poems, pattern=r'^remove\d{1,3}$'))
     dispatcher.add_handler(CallbackQueryHandler(send_audio_of_poem, pattern=r'^audio\d{1,3}$'))
