@@ -1,4 +1,7 @@
-from poems import poems
+from poems import (
+    Poem,
+    poems,
+)
 
 from typing import (
     Callable,
@@ -14,7 +17,7 @@ class Searcher:
     ) -> list[str]:
         results = []
         for poem in poems:
-            lines = poem.splitlines()
+            lines = poem.text.splitlines()
             j = index_of_matched_line(lines, to_search)
             if j > -1:
                 result = lines[j - 1] + '\n' + lines[j] + '\n' + lines[j + 1]
@@ -26,13 +29,13 @@ class Searcher:
             self,
             to_search: Union[str, list[str]],
             index_of_matched_line: Union[Callable[[list[str], str], int], Callable[[list[str], list[str]], int]],
-    ) -> list[tuple[int, str]]:
+    ) -> list[Poem]:
         results = []
-        for i, poem in enumerate(poems):
-            lines = poem.splitlines()
+        for poem in poems:
+            lines = poem.text.splitlines()
             j = index_of_matched_line(lines, to_search)
             if j > -1:
-                results.append((i, poem))
+                results.append(poem)
 
         return results
 
