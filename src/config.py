@@ -1,8 +1,11 @@
 from json import load
 
 
-config = load(open('config.json'))
+with open('config.json') as _config_json:
+    _config = load(_config_json)
 
-API_TOKEN = config['apiToken']
-POEMS_COUNT = config['poemsCount']
-DATABASE_CHANNEL_USERNAME = config['databaseChannelUsername']
+
+API_TOKEN = _config['apiToken']
+POEMS_COUNT = _config['poemsCount']
+DATABASE_CHANNEL_USERNAME = _config['databaseChannelUsername']
+DATABASE_HOST = _config['databaseHost']
