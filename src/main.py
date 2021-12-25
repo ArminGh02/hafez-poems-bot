@@ -96,12 +96,12 @@ def help_command(update: Update, _: CallbackContext) -> None:
 
 
 def reply_line(update: Update, _: CallbackContext) -> None:
-    _db.reply_with_line(update.effective_user.id)
+    _db.set_reply_with_line(update.effective_user.id, True)
     update.message.reply_text('از این پس در نتیجه جستجو، بیت را دریافت خواهی کرد.✅')
 
 
 def reply_poem(update: Update, _: CallbackContext) -> None:
-    _db.reply_with_poem(update.effective_user.id)
+    _db.set_reply_with_line(update.effective_user.id, False)
     update.message.reply_text('از این پس در نتیجه جستجو، کل غزل را دریافت خواهی کرد.✅')
 
 
