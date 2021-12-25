@@ -1,5 +1,6 @@
 {
     "apiToken": "<PLACE YOUR API TOKEN HERE>",
     "poemsCount": 495,
-    "databaseChannelUsername": "@audio_database"
+    "databaseChannelUsername": "@audio_database",
+    "databaseHost": "<PLACE DATABASE HOST HERE>"
 }
