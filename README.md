@@ -2,10 +2,14 @@
 # Hafez Poems Telegram Bot
 
 - [About](#about)
+- [Web Scraping](#web-scraping)
 - [Features](#features)
   - [Search for Poems](#search-for-poems)
   - [Get a Random Poem](#get-a-random-poem)
-  - [Inline Query](#inline-query)
+  - [Inline Mode](#inline-mode)
+  - [Recitation of Each Poem](#recitation-of-each-poem)
+  - [Related Songs](#related-songs)
+  - [Poem Meters](#poem-meters)
 
 ## About
 This is a simple Telegram Bot made mostly for learning purposes.
@@ -34,7 +38,7 @@ There is a command to get a random poem.
 ### Inline Mode
 The bot also supports inline queries. Meaning that you can type bot username in every telegram chat and then search for a query.
 
-### Audio of Each Poem
+### Recitation of Each Poem
 Thanks to **[Ganjoor](ganjoor.net)**, for each poem, you can receive an audio file containig recitation of the poem.
 
 ### Related Songs
