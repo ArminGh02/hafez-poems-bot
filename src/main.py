@@ -1,20 +1,3 @@
-from config import (
-    API_TOKEN,
-    DATABASE_CHANNEL_USERNAME,
-    DATABASE_HOST,
-    POEMS_COUNT,
-)
-from db import DatabaseHandler
-from poems import (
-    Poem,
-    poems,
-)
-from search import (
-    Searcher,
-    index_of_matched_line_string,
-    index_of_matched_line_words,
-)
-
 from random import randrange
 from re import match
 from typing import Union
@@ -36,6 +19,23 @@ from telegram.ext import (
     InlineQueryHandler,
     MessageHandler,
     Updater,
+)
+
+from config import (
+    API_TOKEN,
+    DATABASE_CHANNEL_USERNAME,
+    DATABASE_HOST,
+    POEMS_COUNT,
+)
+from db import DatabaseHandler
+from poems import (
+    Poem,
+    poems,
+)
+from search import (
+    Searcher,
+    index_of_matched_line_string,
+    index_of_matched_line_words,
 )
 
 
@@ -203,7 +203,7 @@ def remove_from_favorite_poems(update: Update, _: CallbackContext) -> None:
 
 
 def send_audio_of_poem(update: Update, context: CallbackContext) -> None:
-    query = update.callback_query
+    query = update.callback_query.message.from_user
     poem_number = int(query.data.removeprefix('audio'))
 
     context.bot.forward_message(

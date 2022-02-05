@@ -1,11 +1,11 @@
-from poems import (
-    Poem,
-    poems,
-)
-
 from typing import (
     Callable,
     Union,
+)
+
+from poems import (
+    Poem,
+    poems,
 )
 
 

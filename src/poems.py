@@ -1,6 +1,6 @@
-from config import POEMS_COUNT
-
 from json import load
+
+from config import POEMS_COUNT
 
 
 class Poem:
@@ -10,10 +10,10 @@ class Poem:
         self.related_songs = related_songs
         self.text = text
 
-    def __eq__(self, o: object) -> bool:
-        if not isinstance(o, Poem):
+    def __eq__(self, obj: object) -> bool:
+        if not isinstance(obj, Poem):
             return False
-        return self.number == o.number
+        return self.number == obj.number
 
     def __hash__(self) -> int:
         return hash(self.number) ^ hash(self.text)
