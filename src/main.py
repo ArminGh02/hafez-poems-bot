@@ -1,5 +1,5 @@
-from random import randrange
-from re import match
+import random
+import re
 from typing import Union
 from uuid import uuid4
 
@@ -21,13 +21,8 @@ from telegram.ext import (
     Updater,
 )
 
-from config import (
-    API_TOKEN,
-    DATABASE_CHANNEL_USERNAME,
-    DATABASE_HOST,
-    POEMS_COUNT,
-)
-from db import DatabaseHandler
+import config
+import db
 from poems import (
     Poem,
     poems,
@@ -47,7 +42,7 @@ _SURROUNDED_WITH_DOUBLE_QUOTES = r'^"[\u0600-\u06FF\s]+"$'
 _NO_MATCH_WAS_FOUND = 'جستجو نتیجه ای در بر نداشت❗️'
 
 _searcher = Searcher()
-_db = DatabaseHandler(DATABASE_HOST)
+_db = db.Handler(config.DATABASE_HOST)
 
 
 ############################
@@ -69,7 +64,7 @@ def start(update: Update, context: CallbackContext) -> None:
             poem_number = int(args[0].removeprefix(_SEND_AUDIO))
             context.bot.forward_message(
                 chat_id=update.effective_chat.id,
-                from_chat_id=DATABASE_CHANNEL_USERNAME,
+                from_chat_id=config.DATABASE_CHANNEL_USERNAME,
                 message_id=poem_number + 2   # channel message ID's start from 2
             )
     else:
@@ -208,7 +203,7 @@ def send_audio_of_poem(update: Update, context: CallbackContext) -> None:
 
     context.bot.forward_message(
         chat_id=update.effective_chat.id,
-        from_chat_id=DATABASE_CHANNEL_USERNAME,
+        from_chat_id=config.DATABASE_CHANNEL_USERNAME,
         message_id=poem_number + 2   # channel message ID's start from 2
     )
 
@@ -279,9 +274,9 @@ def handle_inline_query(update: Update, _: CallbackContext) -> None:
 
     persian_words = r'^[\u0600-\u06FF\s]+$'
     search_results = []
-    if match(_SURROUNDED_WITH_DOUBLE_QUOTES, query):
+    if re.match(_SURROUNDED_WITH_DOUBLE_QUOTES, query):
         search_results = find_results(update, query[1:-1])
-    elif match(persian_words, query):
+    elif re.match(persian_words, query):
         search_results = find_results(update, query.split())
 
     poem = get_random_poem()
@@ -367,7 +362,7 @@ def build_poem_keyboard(poem: Poem, user: User, inline: bool) -> InlineKeyboardM
 
 
 def get_random_poem() -> Poem:
-    rand = randrange(0, POEMS_COUNT - 1)
+    rand = random.randrange(0, config.POEMS_COUNT - 1)
     return poems[rand]
 
 
@@ -410,7 +405,7 @@ def choose_result_mode(update: Update, query: str) -> None:
 
 
 def main() -> None:
-    updater = Updater(API_TOKEN)
+    updater = Updater(config.API_TOKEN)
     dispatcher = updater.dispatcher
     bot = updater.bot
 
