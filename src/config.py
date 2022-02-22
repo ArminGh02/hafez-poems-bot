@@ -1,8 +1,8 @@
-from json import load
+import json
 
 
 with open('config.json') as _config_json:
-    _config = load(_config_json)
+    _config = json.load(_config_json)
 
 
 API_TOKEN = _config['apiToken']
