@@ -1,11 +1,11 @@
 from typing import Any
 
-from pymongo import MongoClient
+import pymongo
 
 
-class DatabaseHandler:
+class Handler:
     def __init__(self, host: str) -> None:
-        client = MongoClient(host)
+        client = pymongo.MongoClient(host)
         db = client['hafez_bot']
         self.__users = db['users']
 
