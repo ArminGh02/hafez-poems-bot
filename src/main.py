@@ -265,7 +265,7 @@ def handle_favorite_poems_inline_query(update: Update, _: CallbackContext) -> No
         )
     )
 
-    update.inline_query.answer(results, cache_time=3)
+    update.inline_query.answer(results, cache_time=0)
 
 
 def handle_inline_query(update: Update, _: CallbackContext) -> None:
@@ -323,7 +323,7 @@ def handle_inline_query(update: Update, _: CallbackContext) -> None:
             ),
         ]
 
-    update.inline_query.answer(results, cache_time=3, switch_pm_text='راهنما ❓', switch_pm_parameter=_INLINE_HELP)
+    update.inline_query.answer(results, cache_time=0, switch_pm_text='راهنما ❓', switch_pm_parameter=_INLINE_HELP)
 
 
 ####################
