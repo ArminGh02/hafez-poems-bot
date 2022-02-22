@@ -4,10 +4,15 @@ from typing import NamedTuple
 import config
 
 
+class Song(NamedTuple):
+    title: str
+    link: str
+
+
 class Poem(NamedTuple):
     meter: str
     number: int
-    related_songs: tuple[dict[str, str], ...]
+    related_songs: tuple[Song, ...]
     text: str
 
 
@@ -24,7 +29,7 @@ def _init() -> None:
             poem_info = json.load(json_file)
 
         meter = poem_info['meter']
-        related_songs = tuple(poem_info['relatedSongs'])
+        related_songs = tuple(map(lambda song: Song(song['title'], song['link'], poem_info['relatedSongs'])))
 
         poems_list[i] = Poem(meter, i, related_songs, text)
 

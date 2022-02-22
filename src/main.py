@@ -218,7 +218,7 @@ def display_related_songs_to_poem(update: Update, _: CallbackContext) -> None:
 
     keyboard = [
         *map(
-            lambda song: [InlineKeyboardButton(song['title'], url=song['link'])],
+            lambda song: [InlineKeyboardButton(song.title, url=song.link)],
             related_songs
         ),
         [InlineKeyboardButton('بازگشت 🔙', callback_data=f'back{poem_number}')]
