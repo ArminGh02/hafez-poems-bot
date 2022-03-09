@@ -198,7 +198,7 @@ def remove_from_favorite_poems(update: Update, _: CallbackContext) -> None:
 
 
 def send_audio_of_poem(update: Update, context: CallbackContext) -> None:
-    query = update.callback_query.message.from_user
+    query = update.callback_query
     poem_number = int(query.data.removeprefix('audio'))
 
     context.bot.forward_message(
