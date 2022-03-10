@@ -12,12 +12,11 @@ from telegram.ext import (
 
 import consts
 import helper
-from poem import poems
 
 
 def handle_favorite_poems(update: Update, _: CallbackContext) -> None:
     user = update.effective_user
-    favorite_poems = map(lambda poem_index: poems[poem_index], consts.db.get_favorite_poems(user.id))
+    favorite_poems = map(lambda poem_index: consts.poems[poem_index], consts.db.get_favorite_poems(user.id))
 
     if not favorite_poems:
         update.inline_query.answer(

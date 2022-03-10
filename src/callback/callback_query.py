@@ -9,7 +9,6 @@ from telegram.ext import (
 
 import consts
 import helper
-from poem import poems
 
 
 def result_mode_chosen(update: Update, _: CallbackContext) -> None:
@@ -43,7 +42,7 @@ def add_to_favorite_poems(update: Update, _: CallbackContext) -> None:
 
     consts.db.add_to_favorite_poems(user.id, poem_index)
 
-    reply_markup = helper.build_poem_keyboard(poems[poem_index], user, update.effective_chat is None)
+    reply_markup = helper.build_poem_keyboard(consts.poems[poem_index], user, update.effective_chat is None)
     query.edit_message_reply_markup(reply_markup)
     query.answer('این غزل به لیست علاقه‌مندی‌های شما افزوده شد.')
 
@@ -56,7 +55,7 @@ def remove_from_favorite_poems(update: Update, _: CallbackContext) -> None:
 
     consts.db.remove_from_favorite_poems(user.id, poem_index)
 
-    reply_markup = helper.build_poem_keyboard(poems[poem_index], user, update.effective_chat is None)
+    reply_markup = helper.build_poem_keyboard(consts.poems[poem_index], user, update.effective_chat is None)
     query.edit_message_reply_markup(reply_markup)
     query.answer('این غزل از لیست علاقه‌مندی‌های شما حذف شد.')
 
@@ -81,7 +80,7 @@ def display_related_songs(update: Update, _: CallbackContext) -> None:
     keyboard = [
         *map(
             lambda song: [InlineKeyboardButton(song.title, url=song.link)],
-            poems[poem_index].related_songs,
+            consts.poems[poem_index].related_songs,
         ),
         [InlineKeyboardButton('بازگشت 🔙', callback_data=f'back{poem_index}')]
     ]
@@ -95,6 +94,6 @@ def return_to_menu_of_poem(update: Update, _:CallbackContext) -> None:
     poem_index = int(query.data.removeprefix('back'))
     user = update.effective_user
 
-    reply_markup = helper.build_poem_keyboard(poems[poem_index], user, update.effective_chat is None)
+    reply_markup = helper.build_poem_keyboard(consts.poems[poem_index], user, update.effective_chat is None)
     query.edit_message_reply_markup(reply_markup)
     query.answer()
