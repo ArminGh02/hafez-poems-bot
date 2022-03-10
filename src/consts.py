@@ -1,4 +1,5 @@
 import json
+import re
 
 import database
 import search
@@ -19,7 +20,8 @@ BOT_USERNAME: str
 INLINE_HELP = 'inline-help'
 SEND_AUDIO = 'audio'
 FAVORITE_POEMS_QUERY = '#favorite_poems'
-SURROUNDED_WITH_DOUBLE_QUOTES = r'^"[\u0600-\u06FF\s]+"$'
+SURROUNDED_WITH_DOUBLE_QUOTES = re.compile(r'^"[\u0600-\u06FF\s]+"$')
+PERSIAN_WORDS = re.compile(r'^[\u0600-\u06FF\s]+$')
 NO_MATCH_WAS_FOUND = 'جستجو نتیجه ای در بر نداشت❗️'
 
 poems: tuple[Poem, ...]

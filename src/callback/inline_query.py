@@ -45,11 +45,10 @@ def handle(update: Update, _: CallbackContext) -> None:
     query = update.inline_query.query
     user = update.effective_user
 
-    persian_words = r'^[\u0600-\u06FF\s]+$'
     search_results = []
-    if re.match(consts.SURROUNDED_WITH_DOUBLE_QUOTES, query):
+    if consts.SURROUNDED_WITH_DOUBLE_QUOTES.match(query):
         search_results = helper.find_results(update, query[1:-1])
-    elif re.match(persian_words, query):
+    elif consts.PERSIAN_WORDS.match(query):
         search_results = helper.find_results(update, query.split())
 
     random_poem = helper.get_random_poem()

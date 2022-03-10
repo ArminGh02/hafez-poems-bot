@@ -65,7 +65,7 @@ def main() -> None:
     )
     dispatcher.add_handler(
         MessageHandler(
-            Filters.text & ~Filters.command & ~Filters.via_bot(username=consts.BOT_USERNAME),
+            Filters.regex(consts.PERSIAN_WORDS) & ~Filters.via_bot(username=consts.BOT_USERNAME),
             message.search_words,
         )
     )
