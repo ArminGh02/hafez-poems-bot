@@ -12,7 +12,7 @@ from telegram.ext import (
 
 import consts
 import helper
-from poems import poems
+from poem import poems
 
 
 def handle_favorite_poems(update: Update, _: CallbackContext) -> None:

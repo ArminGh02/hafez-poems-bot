@@ -9,7 +9,7 @@ from telegram.ext import (
 
 import consts
 import helper
-from poems import poems
+from poem import poems
 
 
 def result_mode_chosen(update: Update, _: CallbackContext) -> None:

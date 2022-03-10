@@ -2,6 +2,7 @@ import json
 
 import database
 import search
+from poem import Poem
 
 
 with open('config.json') as _config_json:
@@ -21,5 +22,6 @@ FAVORITE_POEMS_QUERY = '#favorite_poems'
 SURROUNDED_WITH_DOUBLE_QUOTES = r'^"[\u0600-\u06FF\s]+"$'
 NO_MATCH_WAS_FOUND = 'جستجو نتیجه ای در بر نداشت❗️'
 
+poems: tuple[Poem, ...]
 searcher = search.Searcher()
 db = database.Handler(DATABASE_HOST)

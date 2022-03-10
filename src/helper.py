@@ -10,10 +10,7 @@ from telegram import (
 
 import consts
 import search
-from poems import (
-    Poem,
-    poems
-)
+from poem import Poem
 
 
 def build_poem_keyboard(poem: Poem, user: User, inline: bool) -> InlineKeyboardMarkup:
@@ -47,7 +44,7 @@ def build_poem_keyboard(poem: Poem, user: User, inline: bool) -> InlineKeyboardM
 
 
 def get_random_poem() -> Poem:
-    return poems[random.randrange(0, consts.POEMS_COUNT - 1)]
+    return consts.poems[random.randrange(0, consts.POEMS_COUNT - 1)]
 
 
 def search_impl(update: Update, query: Union[str, list[str]]) -> None:

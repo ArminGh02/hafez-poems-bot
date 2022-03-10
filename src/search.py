@@ -3,10 +3,8 @@ from typing import (
     Union,
 )
 
-from poems import (
-    Poem,
-    poems,
-)
+import consts
+from poem import Poem
 
 
 class Searcher:
@@ -16,7 +14,7 @@ class Searcher:
             index_of_matched_line: Union[Callable[[list[str], str], int], Callable[[list[str], list[str]], int]],
     ) -> list[str]:
         results = []
-        for poem in poems:
+        for poem in consts.poems:
             lines = poem.text.splitlines()
             j = index_of_matched_line(lines, to_search)
             if j > -1:
@@ -31,7 +29,7 @@ class Searcher:
             index_of_matched_line: Union[Callable[[list[str], str], int], Callable[[list[str], list[str]], int]],
     ) -> list[Poem]:
         results = []
-        for poem in poems:
+        for poem in consts.poems:
             lines = poem.text.splitlines()
             j = index_of_matched_line(lines, to_search)
             if j > -1:
