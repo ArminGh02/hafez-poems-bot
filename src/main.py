@@ -248,6 +248,7 @@ def handle_favorite_poems_inline_query(update: Update, _: CallbackContext) -> No
     if not favorite_poems:
         update.inline_query.answer(
             results=[],
+            cache_time=0,
             switch_pm_text='لیست علاقه‌مندی‌های شما خالی است ❗️',
             switch_pm_parameter='no-favorite-poems',
         )
@@ -290,8 +291,9 @@ def handle_inline_query(update: Update, _: CallbackContext) -> None:
     if not search_results:
         update.inline_query.answer(
             results=[random_poem_article],
+            cache_time=0,
             switch_pm_text=_NO_MATCH_WAS_FOUND,
-            switch_pm_parameter=_INLINE_HELP
+            switch_pm_parameter=_INLINE_HELP,
         )
         return
 
@@ -323,7 +325,12 @@ def handle_inline_query(update: Update, _: CallbackContext) -> None:
             ),
         ]
 
-    update.inline_query.answer(results, cache_time=0, switch_pm_text='راهنما ❓', switch_pm_parameter=_INLINE_HELP)
+    update.inline_query.answer(
+        results,
+        cache_time=0,
+        switch_pm_text='راهنما ❓',
+        switch_pm_parameter=_INLINE_HELP,
+    )
 
 
 ####################
