@@ -11,7 +11,7 @@ import helper
 
 def search_words(update: Update, _: CallbackContext) -> None:
     query = update.message.text
-    if consts.database.is_reply_with_line(update.effective_user.id) is None:
+    if consts.db.is_reply_with_line(update.effective_user.id) is None:
         helper.choose_result_mode(update, query)
         return
 
