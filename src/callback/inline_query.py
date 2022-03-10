@@ -38,7 +38,7 @@ def handle_favorite_poems(update: Update, _: CallbackContext) -> None:
             favorite_poems,
         )
     )
-    update.inline_query.answer(results, cache_time=0)
+    update.inline_query.answer(results, cache_time=0, auto_pagination=True)
 
 
 def handle(update: Update, _: CallbackContext) -> None:
@@ -101,4 +101,5 @@ def handle(update: Update, _: CallbackContext) -> None:
         cache_time=0,
         switch_pm_text='راهنما ❓',
         switch_pm_parameter=consts.INLINE_HELP,
+        auto_pagination=True,
     )
