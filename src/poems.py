@@ -1,7 +1,7 @@
 import json
 from typing import NamedTuple
 
-import config
+import consts
 
 
 class Song(NamedTuple):
@@ -20,8 +20,8 @@ poems: tuple[Poem, ...]
 
 
 def _init() -> None:
-    poems_list = [None] * config.POEMS_COUNT
-    for i in range(config.POEMS_COUNT):
+    poems_list = [None] * consts.POEMS_COUNT
+    for i in range(consts.POEMS_COUNT):
         with open(f'divan/ghazal{i + 1}.txt', encoding='utf8') as poem_file:
             text = poem_file.read()
         with open(f'data/poem_{i + 1}_info.json', encoding='utf8') as json_file:

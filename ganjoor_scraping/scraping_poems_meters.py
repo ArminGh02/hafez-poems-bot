@@ -10,12 +10,12 @@ url = 'https://ganjoor.net/hafez/ghazal/sh{:d}/'
 out_dir = 'data'
 
 
-def get_response(poem_number: int) -> Response:
+def get_response(poem_index: int) -> Response:
     while True:
         try:
-            response = requests.get(url.format(poem_number))
+            response = requests.get(url.format(poem_index))
         except:
-            print('Unable to connect to ganjoor.net, poem_number =', poem_number)
+            print('Unable to connect to ganjoor.net, poem_index =', poem_index)
             continue
 
         if response.status_code != 200:

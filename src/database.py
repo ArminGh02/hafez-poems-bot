@@ -20,14 +20,14 @@ class Handler:
         user = self.__users.find_one({'user_id': user_id})
         return set(user['favorite_poems'])
 
-    def add_to_favorite_poems(self, user_id: int, poem_number: int) -> None:
+    def add_to_favorite_poems(self, user_id: int, poem_index: int) -> None:
         favorite_poems = self.get_favorite_poems(user_id)
-        favorite_poems.add(poem_number)
+        favorite_poems.add(poem_index)
         self.__users.update_one({'user_id': user_id}, {'$set': {'favorite_poems': tuple(favorite_poems)}})
 
-    def remove_from_favorite_poems(self, user_id: int, poem_number: int) -> None:
+    def remove_from_favorite_poems(self, user_id: int, poem_index: int) -> None:
         favorite_poems = self.get_favorite_poems(user_id)
-        favorite_poems.remove(poem_number)
+        favorite_poems.remove(poem_index)
         self.__users.update_one({'user_id': user_id}, {'$set': {'favorite_poems': tuple(favorite_poems)}})
 
     def is_reply_with_line(self, user_id: int, default: Any = None) -> Any:
