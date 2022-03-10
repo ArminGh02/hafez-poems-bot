@@ -73,21 +73,22 @@ def start(update: Update, context: CallbackContext) -> None:
 
 
 def help_command(update: Update, _: CallbackContext) -> None:
-    update.message.reply_text(
-        f'سلام {update.effective_user.first_name}!\n'
+    text = (f'سلام {update.effective_user.first_name}!\n'
         'با نوشتن چند کلمه از یک بیت حافظ، غزل یا بیتی را که \n'
         'یک بیتش شامل کلمات وارد شده، باشد دریافت خواهی کرد.\n'
         'در ضمن اگر می خواهی کل یک عبارت با هم (و نه تک تک کلماتش)\n'
         'در بیت جستجو شود، آن را درون "" بگذار.\n'
         'همچنین با زدن دستور /fal یک فال می توانی بگیری.\n'
-        f'تعداد کاربران: {_db.users_count()}',
-        reply_markup=InlineKeyboardMarkup([
+        f'تعداد کاربران: {_db.users_count()}')
+    reply_markup = InlineKeyboardMarkup(
+        [
             [
-                InlineKeyboardButton('Github', 'https://github.com/ArminGh02/hafez-poems-telegram-bot'),
-                InlineKeyboardButton('Developer', 'https://telegram.me/ArminGh02'),
+                InlineKeyboardButton('Github', config.GITHUB_REPO),
+                InlineKeyboardButton('Developer', config.DEVELOPER_USERNAME),
             ],
-        ]),
+        ]
     )
+    update.message.reply_text(text, reply_markup=reply_markup)
 
 
 def reply_line(update: Update, _: CallbackContext) -> None:

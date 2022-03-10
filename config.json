@@ -1,4 +1,6 @@
 {
+    "githubRepo": "https://github.com/ArminGh02/hafez-poems-telegram-bot",
+    "developerUsername": "https://telegram.me/ArminGh02",
     "apiToken": "<PLACE YOUR API TOKEN HERE>",
     "poemsCount": 495,
     "databaseChannelUsername": "@audio_database",
