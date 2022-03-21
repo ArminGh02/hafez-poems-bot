@@ -1,4 +1,5 @@
 import random
+import re
 from typing import Union
 
 from telegram import (
@@ -87,3 +88,7 @@ def choose_result_mode(update: Update, query: str) -> None:
             ]
         )
     )
+
+
+def make_yeh_arabic(s: str) -> str:
+    return consts.PERSIAN_YEH_MIDDLE_OF_WORD.sub(r'ي\1', s)

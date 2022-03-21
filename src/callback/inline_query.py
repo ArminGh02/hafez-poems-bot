@@ -42,7 +42,7 @@ def handle_favorite_poems(update: Update, _: CallbackContext) -> None:
 
 
 def handle(update: Update, _: CallbackContext) -> None:
-    query = update.inline_query.query
+    query = helper.make_yeh_arabic(update.inline_query.query)
     user = update.effective_user
 
     search_results = []

@@ -22,6 +22,7 @@ SEND_AUDIO = 'audio'
 FAVORITE_POEMS_QUERY = '#favorite_poems'
 SURROUNDED_WITH_DOUBLE_QUOTES = re.compile(r'^"[\u0600-\u06FF\s]+"$')
 PERSIAN_WORDS = re.compile(r'^[\u0600-\u06FF\s]+$')
+PERSIAN_YEH_MIDDLE_OF_WORD = re.compile(r'ی([^ ])')
 NO_MATCH_WAS_FOUND = 'جستجو نتیجه ای در بر نداشت❗️'
 
 poems: tuple[Poem, ...]
