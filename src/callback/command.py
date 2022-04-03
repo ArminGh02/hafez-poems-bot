@@ -61,7 +61,7 @@ def reply_poem(update: Update, _: CallbackContext) -> None:
     update.message.reply_text('از این پس در نتیجه جستجو، کل غزل را دریافت خواهی کرد.✅')
 
 
-def random_poem_command(update: Update, _: CallbackContext) -> None:
+def random_poem(update: Update, _: CallbackContext) -> None:
     poem = helper.get_random_poem()
     update.message.reply_text(
         text=poem.text + '🎼وزن: ' + poem.meter,

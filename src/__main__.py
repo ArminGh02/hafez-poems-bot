@@ -25,7 +25,7 @@ def main() -> None:
 
     dispatcher.add_handler(CommandHandler('start', command.start))
     dispatcher.add_handler(CommandHandler('help', command.help_command))
-    dispatcher.add_handler(CommandHandler('faal', command.random_poem_command))
+    dispatcher.add_handler(CommandHandler('faal', command.random_poem))
     dispatcher.add_handler(CommandHandler('favorite', command.list_favorite_poems))
     dispatcher.add_handler(CommandHandler('ghazal', command.reply_poem))
     dispatcher.add_handler(CommandHandler('beit', command.reply_line))
