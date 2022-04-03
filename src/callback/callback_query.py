@@ -7,7 +7,7 @@ from telegram.ext import (
     CallbackContext,
 )
 
-import consts
+import config
 import helper
 
 
@@ -18,11 +18,11 @@ def result_mode_chosen(update: Update, _: CallbackContext) -> None:
 
     if data.startswith('line_'):
         text = 'در نتیجه جستجو بیت دریافت می شود.'
-        consts.db.set_reply_with_line(user.id, True)
+        config.db.set_reply_with_line(user.id, True)
         search_query = data.removeprefix('line_')
     else:  # data == 'poem_<query>'
         text = 'در نتیجه جستجو کل غزل دریافت می شود.'
-        consts.db.set_reply_with_line(user.id, False)
+        config.db.set_reply_with_line(user.id, False)
         search_query = data.removeprefix('poem_')
 
     query.edit_message_text(text)
@@ -40,9 +40,9 @@ def add_to_favorite_poems(update: Update, _: CallbackContext) -> None:
 
     poem_index = int(query.data.removeprefix('add'))
 
-    consts.db.add_to_favorite_poems(user.id, poem_index)
+    config.db.add_to_favorite_poems(user.id, poem_index)
 
-    reply_markup = helper.build_poem_keyboard(consts.poems[poem_index], user, update.effective_chat is None)
+    reply_markup = helper.build_poem_keyboard(config.poems[poem_index], user, update.effective_chat is None)
     query.edit_message_reply_markup(reply_markup)
     query.answer('این غزل به لیست علاقه‌مندی‌های شما افزوده شد.')
 
@@ -53,9 +53,9 @@ def remove_from_favorite_poems(update: Update, _: CallbackContext) -> None:
 
     poem_index = int(query.data.removeprefix('remove'))
 
-    consts.db.remove_from_favorite_poems(user.id, poem_index)
+    config.db.remove_from_favorite_poems(user.id, poem_index)
 
-    reply_markup = helper.build_poem_keyboard(consts.poems[poem_index], user, update.effective_chat is None)
+    reply_markup = helper.build_poem_keyboard(config.poems[poem_index], user, update.effective_chat is None)
     query.edit_message_reply_markup(reply_markup)
     query.answer('این غزل از لیست علاقه‌مندی‌های شما حذف شد.')
 
@@ -66,7 +66,7 @@ def send_audio_of_poem(update: Update, context: CallbackContext) -> None:
 
     context.bot.forward_message(
         chat_id=update.effective_chat.id,
-        from_chat_id=consts.DATABASE_CHANNEL_USERNAME,
+        from_chat_id=config.DATABASE_CHANNEL_USERNAME,
         message_id=poem_index + 2,   # channel message ID's start from 2
     )
 
@@ -80,7 +80,7 @@ def display_related_songs(update: Update, _: CallbackContext) -> None:
     keyboard = [
         *map(
             lambda song: [InlineKeyboardButton(song.title, url=song.link)],
-            consts.poems[poem_index].related_songs,
+            config.poems[poem_index].related_songs,
         ),
         [InlineKeyboardButton('بازگشت 🔙', callback_data=f'back{poem_index}')]
     ]
@@ -94,6 +94,6 @@ def return_to_menu_of_poem(update: Update, _:CallbackContext) -> None:
     poem_index = int(query.data.removeprefix('back'))
     user = update.effective_user
 
-    reply_markup = helper.build_poem_keyboard(consts.poems[poem_index], user, update.effective_chat is None)
+    reply_markup = helper.build_poem_keyboard(config.poems[poem_index], user, update.effective_chat is None)
     query.edit_message_reply_markup(reply_markup)
     query.answer()

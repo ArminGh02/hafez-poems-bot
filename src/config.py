@@ -3,7 +3,10 @@ import re
 
 import database
 import search
-from poem import Poem
+from poem import (
+    Poem,
+    Song,
+)
 
 
 with open('config.json') as _config_json:
@@ -28,3 +31,26 @@ NO_MATCH_WAS_FOUND = 'جستجو نتیجه ای در بر نداشت❗️'
 poems: tuple[Poem, ...]
 searcher = search.Searcher()
 db = database.Handler(DATABASE_HOST)
+
+
+def _init() -> None:
+    poems_list = [None] * POEMS_COUNT
+    for i in range(POEMS_COUNT):
+        with open(f'divan/ghazal{i + 1}.txt', encoding='utf8') as poem_file:
+            text = poem_file.read()
+        with open(f'data/poem_{i + 1}_info.json', encoding='utf8') as json_file:
+            poem_info = json.load(json_file)
+        meter = poem_info['meter']
+        related_songs = tuple(
+            map(
+                lambda song: Song(song['title'], song['link']),
+                poem_info['relatedSongs'],
+            )
+        )
+        poems_list[i] = Poem(meter, i, related_songs, text)
+
+    global poems
+    poems = tuple(poems_list)
+
+
+_init()

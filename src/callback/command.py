@@ -7,14 +7,14 @@ from telegram.ext import (
     CallbackContext,
 )
 
-import consts
+import config
 import helper
 
 
 def start(update: Update, context: CallbackContext) -> None:
     args = context.args
     if args:
-        if args[0] == consts.INLINE_HELP:
+        if args[0] == config.INLINE_HELP:
             update.message.reply_text(
                 'بعد از نوشتن یوزرنیمِ بات در یک چت،\n'
                 'با نوشتن چند کلمه از یک بیت حافظ، غزل یا بیتی را که\n'
@@ -22,16 +22,16 @@ def start(update: Update, context: CallbackContext) -> None:
                 'در ضمن اگر می خواهی کل یک عبارت با هم (و نه تک تک کلماتش)\n'
                 'در بیت جستجو شود، آن را درون "" بگذار.'
             )
-        elif args[0].startswith(consts.SEND_AUDIO):
-            poem_index = int(args[0].removeprefix(consts.SEND_AUDIO))
+        elif args[0].startswith(config.SEND_AUDIO):
+            poem_index = int(args[0].removeprefix(config.SEND_AUDIO))
             context.bot.forward_message(
                 chat_id=update.effective_chat.id,
-                from_chat_id=consts.DATABASE_CHANNEL_USERNAME,
+                from_chat_id=config.DATABASE_CHANNEL_USERNAME,
                 message_id=poem_index + 2   # channel message ID's start from 2
             )
     else:
         help_command(update, context)
-        consts.db.add_user(update.effective_user.id)
+        config.db.add_user(update.effective_user.id)
 
 
 def help_command(update: Update, _: CallbackContext) -> None:
@@ -41,23 +41,23 @@ def help_command(update: Update, _: CallbackContext) -> None:
         'در ضمن اگر می خواهی کل یک عبارت با هم (و نه تک تک کلماتش)\n'
         'در بیت جستجو شود، آن را درون "" بگذار.\n'
         'همچنین با زدن دستور /faal یک فال می توانی بگیری.\n'
-        f'تعداد کاربران: {consts.db.users_count()}')
+        f'تعداد کاربران: {config.db.users_count()}')
     keyboard = [
         [
-            InlineKeyboardButton('Github', consts.GITHUB_REPO),
-            InlineKeyboardButton('Developer', consts.DEVELOPER_USERNAME),
+            InlineKeyboardButton('Github', config.GITHUB_REPO),
+            InlineKeyboardButton('Developer', config.DEVELOPER_USERNAME),
         ],
     ]
     update.message.reply_text(text, reply_markup=InlineKeyboardMarkup(keyboard))
 
 
 def reply_line(update: Update, _: CallbackContext) -> None:
-    consts.db.set_reply_with_line(update.effective_user.id, True)
+    config.db.set_reply_with_line(update.effective_user.id, True)
     update.message.reply_text('از این پس در نتیجه جستجو، بیت را دریافت خواهی کرد.✅')
 
 
 def reply_poem(update: Update, _: CallbackContext) -> None:
-    consts.db.set_reply_with_line(update.effective_user.id, False)
+    config.db.set_reply_with_line(update.effective_user.id, False)
     update.message.reply_text('از این پس در نتیجه جستجو، کل غزل را دریافت خواهی کرد.✅')
 
 
@@ -74,7 +74,7 @@ def list_favorite_poems(update: Update, _: CallbackContext) -> None:
         [
             InlineKeyboardButton(
                 'لیست غزل های مورد علاقه ❤️',
-                switch_inline_query_current_chat=consts.FAVORITE_POEMS_QUERY
+                switch_inline_query_current_chat=config.FAVORITE_POEMS_QUERY
             )
         ],
     ]

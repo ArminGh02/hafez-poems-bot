@@ -10,13 +10,13 @@ from telegram.ext import (
     CallbackContext,
 )
 
-import consts
+import config
 import helper
 
 
 def handle_favorite_poems(update: Update, _: CallbackContext) -> None:
     user = update.effective_user
-    favorite_poems = map(lambda poem_index: consts.poems[poem_index], consts.db.get_favorite_poems(user.id))
+    favorite_poems = map(lambda poem_index: config.poems[poem_index], config.db.get_favorite_poems(user.id))
 
     if not favorite_poems:
         update.inline_query.answer(
@@ -46,9 +46,9 @@ def handle(update: Update, _: CallbackContext) -> None:
     user = update.effective_user
 
     search_results = []
-    if consts.SURROUNDED_WITH_DOUBLE_QUOTES.match(query):
+    if config.SURROUNDED_WITH_DOUBLE_QUOTES.match(query):
         search_results = helper.find_results(update, query[1:-1])
-    elif consts.PERSIAN_WORDS.match(query):
+    elif config.PERSIAN_WORDS.match(query):
         search_results = helper.find_results(update, query.split())
 
     random_poem = helper.get_random_poem()
@@ -63,12 +63,12 @@ def handle(update: Update, _: CallbackContext) -> None:
         update.inline_query.answer(
             results=[random_poem_article],
             cache_time=0,
-            switch_pm_text=consts.NO_MATCH_WAS_FOUND,
-            switch_pm_parameter=consts.INLINE_HELP,
+            switch_pm_text=config.NO_MATCH_WAS_FOUND,
+            switch_pm_parameter=config.INLINE_HELP,
         )
         return
 
-    if consts.db.is_reply_with_line(user.id, True):
+    if config.db.is_reply_with_line(user.id, True):
         results = [
             random_poem_article,
             *map(
@@ -100,6 +100,6 @@ def handle(update: Update, _: CallbackContext) -> None:
         results,
         cache_time=0,
         switch_pm_text='راهنما ❓',
-        switch_pm_parameter=consts.INLINE_HELP,
+        switch_pm_parameter=config.INLINE_HELP,
         auto_pagination=True,
     )

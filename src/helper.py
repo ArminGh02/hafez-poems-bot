@@ -9,7 +9,7 @@ from telegram import (
     User,
 )
 
-import consts
+import config
 import search
 from poem import Poem
 
@@ -18,7 +18,7 @@ def build_poem_keyboard(poem: Poem, user: User, inline: bool) -> InlineKeyboardM
     if inline:
         audio_button = InlineKeyboardButton(
             text='خوانش 🗣',
-            url=f'https://telegram.me/{consts.BOT_USERNAME}?start={consts.SEND_AUDIO}{poem.number}'
+            url=f'https://telegram.me/{config.BOT_USERNAME}?start={config.SEND_AUDIO}{poem.number}'
         )
     else:
         audio_button = InlineKeyboardButton('خوانش 🗣', callback_data=f'audio{poem.number}')
@@ -32,7 +32,7 @@ def build_poem_keyboard(poem: Poem, user: User, inline: bool) -> InlineKeyboardM
         )
         keyboard.append([related_songs_button])
 
-    if poem.number in consts.db.get_favorite_poems(user.id):
+    if poem.number in config.db.get_favorite_poems(user.id):
         keyboard.append(
             [InlineKeyboardButton('حذف از غزل‌های مورد علاقه', callback_data=f'remove{poem.number}')]
         )
@@ -45,15 +45,15 @@ def build_poem_keyboard(poem: Poem, user: User, inline: bool) -> InlineKeyboardM
 
 
 def get_random_poem() -> Poem:
-    return consts.poems[random.randrange(0, consts.POEMS_COUNT - 1)]
+    return config.poems[random.randrange(0, config.POEMS_COUNT - 1)]
 
 
 def search_impl(update: Update, query: Union[str, list[str]]) -> None:
     user = update.effective_user
     results = find_results(update, query)
     if not results:
-        update.effective_chat.send_message(consts.NO_MATCH_WAS_FOUND)
-    elif consts.db.is_reply_with_line(user.id, True):
+        update.effective_chat.send_message(config.NO_MATCH_WAS_FOUND)
+    elif config.db.is_reply_with_line(user.id, True):
         for poem in results:
             update.effective_chat.send_message(poem)
     else:
@@ -70,10 +70,10 @@ def find_results(update: Update, to_search: Union[str, list[str]]) -> Union[list
     else:
         index_of_matched_line = search.index_of_matched_line_words
 
-    if consts.db.is_reply_with_line(update.effective_user.id, True):
-        results = consts.searcher.search_return_lines(to_search, index_of_matched_line)
+    if config.db.is_reply_with_line(update.effective_user.id, True):
+        results = config.searcher.search_return_lines(to_search, index_of_matched_line)
     else:
-        results = consts.searcher.search_return_poems(to_search, index_of_matched_line)
+        results = config.searcher.search_return_poems(to_search, index_of_matched_line)
 
     return results
 
@@ -91,4 +91,4 @@ def choose_result_mode(update: Update, query: str) -> None:
 
 
 def make_yeh_arabic(s: str) -> str:
-    return consts.PERSIAN_YEH_MIDDLE_OF_WORD.sub(r'ي\1', s)
+    return config.PERSIAN_YEH_MIDDLE_OF_WORD.sub(r'ي\1', s)

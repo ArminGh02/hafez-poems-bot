@@ -3,7 +3,7 @@ from typing import (
     Union,
 )
 
-import consts
+import config
 from poem import Poem
 
 
@@ -14,7 +14,7 @@ class Searcher:
             index_of_matched_line: Union[Callable[[list[str], str], int], Callable[[list[str], list[str]], int]],
     ) -> list[str]:
         results = []
-        for poem in consts.poems:
+        for poem in config.poems:
             lines = poem.text.splitlines()
             j = index_of_matched_line(lines, to_search)
             if j > -1:
@@ -29,7 +29,7 @@ class Searcher:
             index_of_matched_line: Union[Callable[[list[str], str], int], Callable[[list[str], list[str]], int]],
     ) -> list[Poem]:
         results = []
-        for poem in consts.poems:
+        for poem in config.poems:
             lines = poem.text.splitlines()
             j = index_of_matched_line(lines, to_search)
             if j > -1:
