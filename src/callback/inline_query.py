@@ -1,4 +1,3 @@
-import re
 from uuid import uuid4
 
 from telegram import (

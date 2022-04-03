@@ -1,5 +1,4 @@
 import random
-import re
 from typing import Union
 
 from telegram import (
@@ -10,7 +9,7 @@ from telegram import (
 )
 
 import config
-import search
+from search import Searcher
 from poem import Poem
 
 
@@ -65,17 +64,10 @@ def search_impl(update: Update, query: Union[str, list[str]]) -> None:
 
 
 def find_results(update: Update, to_search: Union[str, list[str]]) -> Union[list[str], list[Poem]]:
-    if isinstance(to_search, str):
-        index_of_matched_line = search.index_of_matched_line_string
-    else:
-        index_of_matched_line = search.index_of_matched_line_words
-
     if config.db.is_reply_with_line(update.effective_user.id, True):
-        results = config.searcher.search_return_lines(to_search, index_of_matched_line)
+        return Searcher.matching_lines(to_search)
     else:
-        results = config.searcher.search_return_poems(to_search, index_of_matched_line)
-
-    return results
+        return Searcher.matching_poems(to_search)
 
 
 def choose_result_mode(update: Update, query: str) -> None:
