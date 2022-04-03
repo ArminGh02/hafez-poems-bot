@@ -61,11 +61,11 @@ def reply_poem(update: Update, _: CallbackContext) -> None:
     update.message.reply_text('از این پس در نتیجه جستجو، کل غزل را دریافت خواهی کرد.✅')
 
 
-def random_poem(update: Update, _: CallbackContext) -> None:
+def random_poem(update: Update, context: CallbackContext) -> None:
     poem = helper.get_random_poem()
     update.message.reply_text(
         text=poem.text + '🎼وزن: ' + poem.meter,
-        reply_markup=helper.build_poem_keyboard(poem, update.effective_user, False),
+        reply_markup=helper.build_poem_keyboard(poem, update.effective_user, context.bot.username, False),
     )
 
 

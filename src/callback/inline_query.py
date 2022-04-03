@@ -13,7 +13,7 @@ import config
 import helper
 
 
-def handle_favorite_poems(update: Update, _: CallbackContext) -> None:
+def handle_favorite_poems(update: Update, context: CallbackContext) -> None:
     user = update.effective_user
     favorite_poems = map(lambda poem_index: config.poems[poem_index], config.db.get_favorite_poems(user.id))
 
@@ -32,7 +32,7 @@ def handle_favorite_poems(update: Update, _: CallbackContext) -> None:
                 id=str(uuid4()),
                 title=poem.text,
                 input_message_content=InputTextMessageContent(poem.text + '🎼وزن: ' + poem.meter),
-                reply_markup=helper.build_poem_keyboard(poem, user, True),
+                reply_markup=helper.build_poem_keyboard(poem, user, context.bot.username, True),
             ),
             favorite_poems,
         )
@@ -40,7 +40,7 @@ def handle_favorite_poems(update: Update, _: CallbackContext) -> None:
     update.inline_query.answer(results, cache_time=0, auto_pagination=True)
 
 
-def handle(update: Update, _: CallbackContext) -> None:
+def handle(update: Update, context: CallbackContext) -> None:
     query = helper.make_yeh_arabic(update.inline_query.query)
     user = update.effective_user
 
@@ -55,7 +55,7 @@ def handle(update: Update, _: CallbackContext) -> None:
         id=str(uuid4()),
         title='فال 🎲',
         input_message_content=InputTextMessageContent(random_poem.text),
-        reply_markup=helper.build_poem_keyboard(random_poem, user, True),
+        reply_markup=helper.build_poem_keyboard(random_poem, user, context.bot.username, True),
     )
 
     if not search_results:
@@ -89,7 +89,7 @@ def handle(update: Update, _: CallbackContext) -> None:
                     input_message_content=InputTextMessageContent(
                         poem.text + '🎼وزن: ' + poem.meter
                     ),
-                    reply_markup=helper.build_poem_keyboard(poem, user, True),
+                    reply_markup=helper.build_poem_keyboard(poem, user, context.bot.username, True),
                 ),
                 search_results,
             ),

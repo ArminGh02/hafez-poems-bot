@@ -18,7 +18,6 @@ DEVELOPER_USERNAME = _config['developerUsername']
 GITHUB_REPO = _config['githubRepo']
 POEMS_COUNT = _config['poemsCount']
 
-BOT_USERNAME: str
 INLINE_HELP = 'inline-help'
 SEND_AUDIO = 'audio'
 FAVORITE_POEMS_QUERY = '#favorite_poems'

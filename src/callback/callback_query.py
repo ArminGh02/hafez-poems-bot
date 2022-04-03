@@ -11,7 +11,7 @@ import config
 import helper
 
 
-def result_mode_chosen(update: Update, _: CallbackContext) -> None:
+def result_mode_chosen(update: Update, context: CallbackContext) -> None:
     user = update.effective_user
     query = update.callback_query
     data = query.data
@@ -29,12 +29,12 @@ def result_mode_chosen(update: Update, _: CallbackContext) -> None:
     query.answer()
 
     if search_query.startswith('"'):
-        helper.search_impl(update, search_query[1:-1])
+        helper.search_impl(update, search_query[1:-1], context.bot.username)
     else:
-        helper.search_impl(update, search_query.split())
+        helper.search_impl(update, search_query.split(), context.bot.username)
 
 
-def add_to_favorite_poems(update: Update, _: CallbackContext) -> None:
+def add_to_favorite_poems(update: Update, context: CallbackContext) -> None:
     user = update.effective_user
     query = update.callback_query
 
@@ -42,12 +42,17 @@ def add_to_favorite_poems(update: Update, _: CallbackContext) -> None:
 
     config.db.add_to_favorite_poems(user.id, poem_index)
 
-    reply_markup = helper.build_poem_keyboard(config.poems[poem_index], user, update.effective_chat is None)
+    reply_markup = helper.build_poem_keyboard(
+        config.poems[poem_index],
+        user,
+        context.bot.username,
+        update.effective_chat is None,
+    )
     query.edit_message_reply_markup(reply_markup)
     query.answer('این غزل به لیست علاقه‌مندی‌های شما افزوده شد.')
 
 
-def remove_from_favorite_poems(update: Update, _: CallbackContext) -> None:
+def remove_from_favorite_poems(update: Update, context: CallbackContext) -> None:
     user = update.effective_user
     query = update.callback_query
 
@@ -55,7 +60,12 @@ def remove_from_favorite_poems(update: Update, _: CallbackContext) -> None:
 
     config.db.remove_from_favorite_poems(user.id, poem_index)
 
-    reply_markup = helper.build_poem_keyboard(config.poems[poem_index], user, update.effective_chat is None)
+    reply_markup = helper.build_poem_keyboard(
+        config.poems[poem_index],
+        user,
+        context.bot.username,
+        update.effective_chat is None,
+    )
     query.edit_message_reply_markup(reply_markup)
     query.answer('این غزل از لیست علاقه‌مندی‌های شما حذف شد.')
 
@@ -89,11 +99,16 @@ def display_related_songs(update: Update, _: CallbackContext) -> None:
     query.answer()
 
 
-def return_to_menu_of_poem(update: Update, _:CallbackContext) -> None:
+def return_to_menu_of_poem(update: Update, context: CallbackContext) -> None:
     query = update.callback_query
     poem_index = int(query.data.removeprefix('back'))
     user = update.effective_user
 
-    reply_markup = helper.build_poem_keyboard(config.poems[poem_index], user, update.effective_chat is None)
+    reply_markup = helper.build_poem_keyboard(
+        config.poems[poem_index],
+        user,
+        context.bot.username,
+        update.effective_chat is None,
+    )
     query.edit_message_reply_markup(reply_markup)
     query.answer()

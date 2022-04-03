@@ -13,11 +13,11 @@ from search import Searcher
 from poem import Poem
 
 
-def build_poem_keyboard(poem: Poem, user: User, inline: bool) -> InlineKeyboardMarkup:
+def build_poem_keyboard(poem: Poem, user: User, bot_username: str, inline: bool) -> InlineKeyboardMarkup:
     if inline:
         audio_button = InlineKeyboardButton(
             text='خوانش 🗣',
-            url=f'https://telegram.me/{config.BOT_USERNAME}?start={config.SEND_AUDIO}{poem.number}'
+            url=f'https://telegram.me/{bot_username}?start={config.SEND_AUDIO}{poem.number}'
         )
     else:
         audio_button = InlineKeyboardButton('خوانش 🗣', callback_data=f'audio{poem.number}')
@@ -47,7 +47,7 @@ def get_random_poem() -> Poem:
     return config.poems[random.randrange(0, config.POEMS_COUNT - 1)]
 
 
-def search_impl(update: Update, query: Union[str, list[str]]) -> None:
+def search_impl(update: Update, query: Union[str, list[str]], bot_username: str) -> None:
     user = update.effective_user
     results = find_results(update, query)
     if not results:
@@ -59,7 +59,7 @@ def search_impl(update: Update, query: Union[str, list[str]]) -> None:
         for poem in results:
             update.effective_chat.send_message(
                 text=poem.text + '🎼وزن: ' + poem.meter,
-                reply_markup=build_poem_keyboard(poem, user, False),
+                reply_markup=build_poem_keyboard(poem, user, bot_username, False),
             )
 
 

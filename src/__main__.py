@@ -19,9 +19,6 @@ from callback import (
 def main() -> None:
     updater = Updater(config.API_TOKEN)
     dispatcher = updater.dispatcher
-    bot = updater.bot
-
-    config.BOT_USERNAME = bot.username
 
     dispatcher.add_handler(CommandHandler('start', command.start))
     dispatcher.add_handler(CommandHandler('help', command.help_command))
@@ -38,7 +35,7 @@ def main() -> None:
     )
     dispatcher.add_handler(
         MessageHandler(
-            Filters.regex(config.PERSIAN_WORDS) & ~Filters.via_bot(username=config.BOT_USERNAME),
+            Filters.regex(config.PERSIAN_WORDS) & ~Filters.via_bot(username=updater.bot.username),
             message.search_words,
         )
     )
@@ -53,7 +50,7 @@ def main() -> None:
     dispatcher.add_handler(InlineQueryHandler(inline_query.handle_favorite_poems, pattern=config.FAVORITE_POEMS_QUERY))
     dispatcher.add_handler(InlineQueryHandler(inline_query.handle))
 
-    bot.set_my_commands(
+    updater.bot.set_my_commands(
         [
             ('start', 'بات را ری‌استارت می‌کند'),
             ('help', 'راهنما'),
