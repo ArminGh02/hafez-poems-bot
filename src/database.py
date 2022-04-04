@@ -16,21 +16,21 @@ class Handler:
     def users_count(self) -> int:
         return self.__users.count_documents({})
 
-    def get_favorite_poems(self, user_id: int) -> set[int]:
+    def favorite_poems(self, user_id: int) -> set[int]:
         user = self.__users.find_one({'user_id': user_id})
         return set(user['favorite_poems'])
 
     def add_to_favorite_poems(self, user_id: int, poem_index: int) -> None:
-        favorite_poems = self.get_favorite_poems(user_id)
+        favorite_poems = self.favorite_poems(user_id)
         favorite_poems.add(poem_index)
         self.__users.update_one({'user_id': user_id}, {'$set': {'favorite_poems': tuple(favorite_poems)}})
 
     def remove_from_favorite_poems(self, user_id: int, poem_index: int) -> None:
-        favorite_poems = self.get_favorite_poems(user_id)
+        favorite_poems = self.favorite_poems(user_id)
         favorite_poems.remove(poem_index)
         self.__users.update_one({'user_id': user_id}, {'$set': {'favorite_poems': tuple(favorite_poems)}})
 
-    def is_reply_with_line(self, user_id: int, default: Any = None) -> Any:
+    def reply_with_line(self, user_id: int, default: Any = None) -> Any:
         user = self.__users.find_one({'user_id': user_id})
         return user.get('reply_with_line', default)
 

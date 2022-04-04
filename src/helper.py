@@ -31,7 +31,7 @@ def build_poem_keyboard(poem: Poem, user: User, bot_username: str, inline: bool)
         )
         keyboard.append([related_songs_button])
 
-    if poem.number in config.db.get_favorite_poems(user.id):
+    if poem.number in config.db.favorite_poems(user.id):
         keyboard.append(
             [InlineKeyboardButton('حذف از غزل‌های مورد علاقه', callback_data=f'remove{poem.number}')]
         )
@@ -43,7 +43,7 @@ def build_poem_keyboard(poem: Poem, user: User, bot_username: str, inline: bool)
     return InlineKeyboardMarkup(keyboard)
 
 
-def get_random_poem() -> Poem:
+def random_poem() -> Poem:
     return config.poems[random.randrange(0, config.POEMS_COUNT - 1)]
 
 
@@ -52,7 +52,7 @@ def search_impl(update: Update, query: Union[str, list[str]], bot_username: str)
     results = find_results(update, query)
     if not results:
         update.effective_chat.send_message(config.NO_MATCH_WAS_FOUND)
-    elif config.db.is_reply_with_line(user.id, True):
+    elif config.db.reply_with_line(user.id, True):
         for poem in results:
             update.effective_chat.send_message(poem)
     else:
@@ -64,7 +64,7 @@ def search_impl(update: Update, query: Union[str, list[str]], bot_username: str)
 
 
 def find_results(update: Update, to_search: Union[str, list[str]]) -> Union[list[str], list[Poem]]:
-    if config.db.is_reply_with_line(update.effective_user.id, True):
+    if config.db.reply_with_line(update.effective_user.id, True):
         return Searcher.matching_lines(to_search)
     else:
         return Searcher.matching_poems(to_search)

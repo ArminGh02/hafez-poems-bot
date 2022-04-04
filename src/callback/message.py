@@ -12,7 +12,7 @@ import helper
 def search_words(update: Update, context: CallbackContext) -> None:
     query = helper.make_yeh_arabic(update.message.text)
 
-    if config.db.is_reply_with_line(update.effective_user.id) is None:
+    if config.db.reply_with_line(update.effective_user.id) is None:
         helper.choose_result_mode(update, query)
         return
 
@@ -22,7 +22,7 @@ def search_words(update: Update, context: CallbackContext) -> None:
 def search_string(update: Update, context: CallbackContext) -> None:
     query = helper.make_yeh_arabic(update.message.text)
 
-    if config.db.is_reply_with_line(update.effective_user.id) is None:
+    if config.db.reply_with_line(update.effective_user.id) is None:
         helper.choose_result_mode(update, query)
         return
 

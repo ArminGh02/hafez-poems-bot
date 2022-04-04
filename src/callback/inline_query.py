@@ -15,7 +15,7 @@ import helper
 
 def favorite_poems(update: Update, context: CallbackContext) -> None:
     user = update.effective_user
-    fav_poems = map(lambda poem_index: config.poems[poem_index], config.db.get_favorite_poems(user.id))
+    fav_poems = map(lambda poem_index: config.poems[poem_index], config.db.favorite_poems(user.id))
 
     if not fav_poems:
         update.inline_query.answer(
@@ -50,7 +50,7 @@ def handle(update: Update, context: CallbackContext) -> None:
     elif config.PERSIAN_WORDS.match(query):
         search_results = helper.find_results(update, query.split())
 
-    random_poem = helper.get_random_poem()
+    random_poem = helper.random_poem()
     random_poem_article = InlineQueryResultArticle(
         id=str(uuid4()),
         title='فال 🎲',
@@ -67,7 +67,7 @@ def handle(update: Update, context: CallbackContext) -> None:
         )
         return
 
-    if config.db.is_reply_with_line(user.id, True):
+    if config.db.reply_with_line(user.id, True):
         results = [
             random_poem_article,
             *map(
