@@ -47,7 +47,7 @@ def main() -> None:
     dispatcher.add_handler(CallbackQueryHandler(callback_query.display_related_songs, pattern=r'^songs\d{1,3}$'))
     dispatcher.add_handler(CallbackQueryHandler(callback_query.return_to_menu_of_poem, pattern=r'^back\d{1,3}$'))
 
-    dispatcher.add_handler(InlineQueryHandler(inline_query.handle_favorite_poems, pattern=config.FAVORITE_POEMS_QUERY))
+    dispatcher.add_handler(InlineQueryHandler(inline_query.favorite_poems, pattern=config.FAVORITE_POEMS_QUERY))
     dispatcher.add_handler(InlineQueryHandler(inline_query.handle))
 
     updater.bot.set_my_commands(

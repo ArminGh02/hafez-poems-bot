@@ -13,11 +13,11 @@ import config
 import helper
 
 
-def handle_favorite_poems(update: Update, context: CallbackContext) -> None:
+def favorite_poems(update: Update, context: CallbackContext) -> None:
     user = update.effective_user
-    favorite_poems = map(lambda poem_index: config.poems[poem_index], config.db.get_favorite_poems(user.id))
+    fav_poems = map(lambda poem_index: config.poems[poem_index], config.db.get_favorite_poems(user.id))
 
-    if not favorite_poems:
+    if not fav_poems:
         update.inline_query.answer(
             results=[],
             cache_time=0,
@@ -34,7 +34,7 @@ def handle_favorite_poems(update: Update, context: CallbackContext) -> None:
                 input_message_content=InputTextMessageContent(poem.text + '🎼وزن: ' + poem.meter),
                 reply_markup=helper.build_poem_keyboard(poem, user, context.bot.username, True),
             ),
-            favorite_poems,
+            fav_poems,
         )
     )
     update.inline_query.answer(results, cache_time=0, auto_pagination=True)
