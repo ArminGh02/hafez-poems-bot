@@ -10,7 +10,7 @@ from poem import Poem
 class Searcher:
     @staticmethod
     def matching_lines(to_search: Union[str, list[str]]) -> list[str]:
-        index_of = Searcher._get_index_of(to_search)
+        index_of = Searcher._index_of(to_search)
         results = []
         for poem in config.poems:
             lines = poem.text.splitlines()
@@ -22,7 +22,7 @@ class Searcher:
 
     @staticmethod
     def matching_poems(to_search: Union[str, list[str]]) -> list[Poem]:
-        index_of = Searcher._get_index_of(to_search)
+        index_of = Searcher._index_of(to_search)
         results = []
         for poem in config.poems:
             lines = poem.text.splitlines()
@@ -31,7 +31,7 @@ class Searcher:
         return results
 
     @staticmethod
-    def _get_index_of(to_search: str) -> Union[Callable[[list[str], str], int], Callable[[list[str], list[str]], int]]:
+    def _index_of(to_search: str) -> Union[Callable[[list[str], str], int], Callable[[list[str], list[str]], int]]:
         if isinstance(to_search, str):
             return Searcher._index_of_string
         if isinstance(to_search, list):
