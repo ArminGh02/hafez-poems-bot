@@ -30,11 +30,11 @@ def start(update: Update, context: CallbackContext) -> None:
                 message_id=poem_index + 2   # channel message ID's start from 2
             )
     else:
-        help_command(update, context)
+        help_(update, context)
         config.db.add_user(update.effective_user.id)
 
 
-def help_command(update: Update, _: CallbackContext) -> None:
+def help_(update: Update, _: CallbackContext) -> None:
     text = (f'سلام {update.effective_user.first_name}!\n'
         'با نوشتن چند کلمه از یک بیت حافظ، غزل یا بیتی را که \n'
         'یک بیتش شامل کلمات وارد شده، باشد دریافت خواهی کرد.\n'

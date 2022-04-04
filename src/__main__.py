@@ -21,7 +21,7 @@ def main() -> None:
     dispatcher = updater.dispatcher
 
     dispatcher.add_handler(CommandHandler('start', command.start))
-    dispatcher.add_handler(CommandHandler('help', command.help_command))
+    dispatcher.add_handler(CommandHandler('help', command.help_))
     dispatcher.add_handler(CommandHandler('faal', command.random_poem))
     dispatcher.add_handler(CommandHandler('favorite', command.list_favorite_poems))
     dispatcher.add_handler(CommandHandler('ghazal', command.reply_poem))
