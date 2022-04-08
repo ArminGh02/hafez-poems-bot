@@ -1,3 +1,4 @@
+from typing import Union
 from uuid import uuid4
 
 from telegram import (
@@ -11,6 +12,8 @@ from telegram.ext import (
 
 import config
 import helper
+from poem import Poem
+from search import Searcher
 
 
 def favorite_poems(update: Update, context: CallbackContext) -> None:
@@ -46,16 +49,16 @@ def handle(update: Update, context: CallbackContext) -> None:
 
     search_results = []
     if config.SURROUNDED_WITH_DOUBLE_QUOTES.match(query):
-        search_results = helper.find_results(update, query[1:-1])
+        search_results = Searcher.matching_poems_and_lines(query[1:-1])
     elif config.PERSIAN_WORDS.match(query):
-        search_results = helper.find_results(update, query.split())
+        search_results = Searcher.matching_poems_and_lines(query.split())
 
-    random_poem = helper.random_poem()
+    rand_poem = helper.random_poem()
     random_poem_article = InlineQueryResultArticle(
         id=str(uuid4()),
         title='فال 🎲',
-        input_message_content=InputTextMessageContent(random_poem.text),
-        reply_markup=helper.build_poem_keyboard(random_poem, user, context.bot.username, True),
+        input_message_content=InputTextMessageContent(rand_poem.text),
+        reply_markup=helper.build_poem_keyboard(rand_poem, user, context.bot.username, True),
     )
 
     if not search_results:
@@ -67,36 +70,26 @@ def handle(update: Update, context: CallbackContext) -> None:
         )
         return
 
-    if config.db.reply_with_line(user.id, True):
-        results = [
-            random_poem_article,
-            *map(
-                lambda search_result: InlineQueryResultArticle(
-                    id=str(uuid4()),
-                    title=search_result,
-                    input_message_content=InputTextMessageContent(search_result),
+    def result_to_article(search_res: Union[str, Poem]) -> InlineQueryResultArticle:
+        if isinstance(search_res, str):
+            return InlineQueryResultArticle(
+                id=str(uuid4()),
+                title='بیت: ' + search_res,
+                input_message_content=InputTextMessageContent(search_res),
+            )
+        if isinstance(search_res, Poem):
+            return InlineQueryResultArticle(
+                id=str(uuid4()),
+                title='غزل: ' + search_res.text,
+                input_message_content=InputTextMessageContent(
+                    search_res.text + '🎼وزن: ' + search_res.meter
                 ),
-                search_results,
-            ),
-        ]
-    else:
-        results = [
-            random_poem_article,
-            *map(
-                lambda poem: InlineQueryResultArticle(
-                    id=str(uuid4()),
-                    title=poem.text,
-                    input_message_content=InputTextMessageContent(
-                        poem.text + '🎼وزن: ' + poem.meter
-                    ),
-                    reply_markup=helper.build_poem_keyboard(poem, user, context.bot.username, True),
-                ),
-                search_results,
-            ),
-        ]
+                reply_markup=helper.build_poem_keyboard(search_res, user, context.bot.username, True),
+            )
+        raise TypeError(f'unsupported type: {type(search_res)}')
 
     update.inline_query.answer(
-        results,
+        results=[random_poem_article, *map(result_to_article, search_results)],
         cache_time=0,
         switch_pm_text='راهنما ❓',
         switch_pm_parameter=config.INLINE_HELP,

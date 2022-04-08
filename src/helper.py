@@ -49,7 +49,12 @@ def random_poem() -> Poem:
 
 def search_impl(update: Update, query: Union[str, list[str]], bot_username: str) -> None:
     user = update.effective_user
-    results = find_results(update, query)
+
+    if config.db.reply_with_line(user.id, True):
+        results = Searcher.matching_lines(query)
+    else:
+        results = Searcher.matching_poems(query)
+
     if not results:
         update.effective_chat.send_message(config.NO_MATCH_WAS_FOUND)
     elif config.db.reply_with_line(user.id, True):
@@ -61,13 +66,6 @@ def search_impl(update: Update, query: Union[str, list[str]], bot_username: str)
                 text=poem.text + '🎼وزن: ' + poem.meter,
                 reply_markup=build_poem_keyboard(poem, user, bot_username, False),
             )
-
-
-def find_results(update: Update, to_search: Union[str, list[str]]) -> Union[list[str], list[Poem]]:
-    if config.db.reply_with_line(update.effective_user.id, True):
-        return Searcher.matching_lines(to_search)
-    else:
-        return Searcher.matching_poems(to_search)
 
 
 def choose_result_mode(update: Update, query: str) -> None:

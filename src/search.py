@@ -16,8 +16,8 @@ class Searcher:
             lines = poem.text.splitlines()
             i = index_of(lines, to_search)
             if i >= 0:
-                result = lines[i - 1] + '\n' + lines[i] + '\n' + lines[i + 1]
-                results.append(result)
+                res = lines[i - 1] + '\n' + lines[i] + '\n' + lines[i + 1]
+                results.append(res)
         return results
 
     @staticmethod
@@ -27,6 +27,19 @@ class Searcher:
         for poem in config.poems:
             lines = poem.text.splitlines()
             if index_of(lines, to_search) >= 0:
+                results.append(poem)
+        return results
+
+    @staticmethod
+    def matching_poems_and_lines(to_search: Union[str, list[str]]) -> list[Union[str, Poem]]:
+        index_of = Searcher._index_of(to_search)
+        results = []
+        for poem in config.poems:
+            lines = poem.text.splitlines()
+            i = index_of(lines, to_search)
+            if i >= 0:
+                res = lines[i - 1] + '\n' + lines[i] + '\n' + lines[i + 1]
+                results.append(res)
                 results.append(poem)
         return results
 
