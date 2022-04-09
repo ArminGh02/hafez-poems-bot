@@ -49,9 +49,9 @@ def handle(update: Update, context: CallbackContext) -> None:
 
     search_results = []
     if config.SURROUNDED_WITH_DOUBLE_QUOTES.match(query):
-        search_results = Searcher.matching_poems_and_lines(query[1:-1])
+        search_results = Searcher.matching_poems_and_lines(query[1:-1], limit=50)
     elif config.PERSIAN_WORDS.match(query):
-        search_results = Searcher.matching_poems_and_lines(query.split())
+        search_results = Searcher.matching_poems_and_lines(query.split(), limit=50)
 
     rand_poem = helper.random_poem()
     random_poem_article = InlineQueryResultArticle(

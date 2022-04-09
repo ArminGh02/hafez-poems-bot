@@ -31,16 +31,20 @@ class Searcher:
         return results
 
     @staticmethod
-    def matching_poems_and_lines(to_search: Union[str, list[str]]) -> list[Union[str, Poem]]:
+    def matching_poems_and_lines(to_search: Union[str, list[str]], limit: int = -1) -> list[Union[str, Poem]]:
         index_of = Searcher._index_of(to_search)
         results = []
+        found = 0
         for poem in config.poems:
+            if found >= limit >= 0:
+                break
             lines = poem.text.splitlines()
             i = index_of(lines, to_search)
             if i >= 0:
                 res = lines[i - 1] + '\n' + lines[i] + '\n' + lines[i + 1]
                 results.append(res)
                 results.append(poem)
+                found += 1
         return results
 
     @staticmethod
